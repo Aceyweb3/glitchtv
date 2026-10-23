@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   ArrowDownRight, ArrowLeft, ArrowRight, ArrowUpRight, Bell, BookOpen, Check,
   ChevronLeft, ChevronRight, CircleDollarSign, Clock3, Compass, Copy, Disc3, Flame,
-  Gamepad2, Headphones, Heart, Home, LockKeyhole, Menu, Minus, Play, Plus, Radio,
+  Gamepad2, Headphones, Heart, Home, Info, LockKeyhole, LogOut, Menu, Minus, Play, Plus, Radio,
   Scissors, Search, Send, Share2, Shield, ShoppingBag, ShoppingCart, Sparkles,
   Trash2, Trophy, Users, Video, X,
 } from 'lucide-react';
