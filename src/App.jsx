@@ -2,14 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import {
   ArrowDownRight, ArrowLeft, ArrowRight, ArrowUpRight, Bell, BookOpen, Check,
   ChevronLeft, ChevronRight, CircleDollarSign, Clock3, Compass, Copy, Disc3, Flame,
-  Gamepad2, Headphones, Heart, Home, Info, LockKeyhole, LogOut, Menu, Minus, Play, Plus, Radio,
-  Scissors, Search, Send, Share2, Shield, ShoppingBag, ShoppingCart, Sparkles,
+  Gamepad2, Headphones, Heart, Home, Info, LockKeyhole, LogOut, Menu, MessageCircle, Minus, Play, Plus, Radio,
+  Repeat2, Scissors, Search, Send, Share2, Shield, ShoppingBag, ShoppingCart, Sparkles,
   Trash2, Trophy, Users, Video, X,
 } from 'lucide-react';
 
 const achievements = [
-  { id: 'first_watch', name: 'Signal acquired', description: 'Watch your first title', points: 10, icon: '▶', category: 'watch' },
-  { id: 'first_read', name: 'Page one', description: 'Read your first chapter', points: 10, icon: '▤', category: 'read' },
+  { id: 'first_watch', name: 'First Signal', description: 'Resume your first title', points: 10, icon: '▶', category: 'watch' },
+  { id: 'first_read', name: 'First Chapter', description: 'Open your first comic', points: 10, icon: '▤', category: 'read' },
   { id: 'discover_10', name: 'Off the map', description: 'Discover 10 titles', points: 25, icon: '⌖', category: 'watch' },
   { id: 'vote_monthly', name: 'Monthly voter', description: 'Vote in the monthly Top 15', points: 20, icon: '▲', category: 'vote' },
   { id: 'vote_5', name: 'Power ballot', description: 'Cast 5 votes lifetime', points: 30, icon: '✳', category: 'vote' },
@@ -48,6 +48,20 @@ const merchProducts = [
   { id: 'soft-reset-zine', title: 'SOFT RESET / Issue zero', creator: 'Mina Cho', price: 18, category: 'PRINT', image: 'photo-1544947950-fa07a98d237f', description: 'A small-format collection of early panels.' },
 ];
 
+const seedFollowing = ['@junovale', '@kira.exe', '@mori_k'];
+const seedSocialPosts = [
+  { id: 'sample-afterimage', content: 'Panels from chapter 04 are finally out in the world. Took three rewrites to get the silence right. Hope it finds you. #Afterimage', createdAt: new Date(Date.now() - 7200000).toISOString(), handle: '@junovale', sample: true, mediaUrl: 'https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1200&q=80', likes: 248, reposts: 31 },
+  { id: 'sample-kira', content: 'Late-night watch party for Neon Veil at 9. Bring your theories. No spoilers past episode four.', createdAt: new Date(Date.now() - 14400000).toISOString(), handle: '@kira.exe', sample: true, mediaUrl: 'https://images.unsplash.com/photo-1535223289827-42f1e9919769?auto=format&fit=crop&w=1200&q=80', likes: 96, reposts: 14 },
+  { id: 'sample-mori', content: 'Ghostline 09 is live. Built this one for the last train home.', createdAt: new Date(Date.now() - 28800000).toISOString(), handle: '@mori_k', sample: true, mediaUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80', likes: 182, reposts: 22 },
+  { id: 'sample-mina', content: 'Soft Reset chapter six is up. Thank you for reading along.', createdAt: new Date(Date.now() - 36000000).toISOString(), handle: '@minacho', sample: true, mediaUrl: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=1200&q=80', likes: 74, reposts: 9 },
+];
+
+const friendWatching = [
+  { handle: '@kira.exe', name: 'Kira', titleId: 'neon-veil', progress: 64, note: 'rewatching the signal scene' },
+  { handle: '@junovale', name: 'Juno Vale', titleId: 'ghostline', progress: 28, note: 'first time watching' },
+  { handle: '@mori_k', name: 'Mori_K', titleId: 'dead-air', progress: 81, note: 'almost at the finale' },
+];
+
 const voteEntries = {
   comic: [
     { id: 'afterimage', title: 'Afterimage', creator: 'Juno Vale', image: titles[1].image },
@@ -69,7 +83,8 @@ const seedRooms = [
 
 const initialAppData = {
   posts: [], rooms: seedRooms, watchedTitles: [], readTitles: [], progress: {}, likedPosts: [], waitlistEmail: '',
-  cart: [], orders: [], clips: [], readProgress: {},
+  cart: [], orders: [], clips: [], readProgress: {}, startedWatches: [], startedReads: [],
+  following: seedFollowing, reposts: [], products: [], messages: [],
 };
 
 const initialVoteCounts = Object.fromEntries(
@@ -84,7 +99,7 @@ const tiers = [
 const navItems = [
   { label: 'Home', icon: Home }, { label: 'Watch', icon: Play }, { label: 'Read', icon: BookOpen },
   { label: 'Social', icon: Users }, { label: 'Parties', icon: Headphones },
-  { label: 'Marketplace', icon: ShoppingBag },
+  { label: 'Marketplace', icon: ShoppingBag }, { label: 'Messages', icon: MessageCircle },
 ];
 
 function getTier(score) {
@@ -140,7 +155,14 @@ function App() {
   const [modal, setModal] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [guideOpen, setGuideOpen] = useState(false);
+  const [selectedDm, setSelectedDm] = useState('@junovale');
   const searchRef = useRef(null);
+  const startedActions = useRef(new Set([
+    ...appData.startedWatches.map((id) => `watch:${id}`),
+    ...appData.startedReads.map((id) => `read:${id}`),
+    ...appData.watchedTitles.map((id) => `watch:${id}`),
+    ...appData.readTitles.map((id) => `read:${id}`),
+  ]));
   const seenUnlocks = useRef(new Set(score.achievements.map((item) => item.achievementId)));
   const month = new Date().toLocaleString('en', { month: 'long' });
   const monthKey = new Date().toISOString().slice(0, 7);
@@ -167,7 +189,7 @@ function App() {
       if (seenUnlocks.current.has(unlock.achievementId)) return;
       seenUnlocks.current.add(unlock.achievementId);
       const achievement = achievements.find((item) => item.id === unlock.achievementId);
-      if (achievement) setToast(`+${achievement.points} GS  ·  ${achievement.name}`);
+      if (achievement) setToast(`+${achievement.points} GS — ${achievement.name}`);
     });
   }, [score.achievements]);
   useEffect(() => {
@@ -234,22 +256,28 @@ function App() {
 
   const openTitle = (item, mode) => {
     discover(item.id);
+    const actionKey = `${mode}:${item.id}`;
+    if (!startedActions.current.has(actionKey)) {
+      startedActions.current.add(actionKey);
+      const startedList = mode === 'watch' ? 'startedWatches' : 'startedReads';
+      setAppData((current) => ({
+        ...current,
+        [startedList]: current[startedList].includes(item.id) ? current[startedList] : [...current[startedList], item.id],
+      }));
+      incrementStat(mode === 'watch' ? 'titlesWatched' : 'chaptersRead');
+      award(mode === 'watch' ? 'first_watch' : 'first_read');
+    }
     setModal({ type: `media-${mode}`, item });
   };
 
   const completeTitle = (item, mode) => {
     const listKey = mode === 'watch' ? 'watchedTitles' : 'readTitles';
-    const alreadyComplete = appData[listKey].includes(item.id);
     setAppData((current) => ({
       ...current,
       [listKey]: current[listKey].includes(item.id) ? current[listKey] : [...current[listKey], item.id],
       progress: mode === 'watch' ? { ...current.progress, [item.id]: 100 } : current.progress,
       readProgress: mode === 'read' ? { ...current.readProgress, [item.id]: 3 } : current.readProgress,
     }));
-    if (!alreadyComplete) {
-      incrementStat(mode === 'watch' ? 'titlesWatched' : 'chaptersRead');
-      award(mode === 'watch' ? 'first_watch' : 'first_read');
-    }
     announce(mode === 'watch' ? `TITLE COMPLETE  ·  ${item.title}` : `CHAPTER COMPLETE  ·  ${item.title}`);
     setModal(null);
   };
@@ -318,6 +346,43 @@ function App() {
       : [...current.likedPosts, postId],
   }));
 
+  const toggleFollow = (handle) => setAppData((current) => ({
+    ...current,
+    following: current.following.includes(handle)
+      ? current.following.filter((item) => item !== handle)
+      : [...current.following, handle],
+  }));
+
+  const toggleRepost = (postId) => setAppData((current) => ({
+    ...current,
+    reposts: current.reposts.includes(postId)
+      ? current.reposts.filter((item) => item !== postId)
+      : [...current.reposts, postId],
+  }));
+
+  const addMarketplaceProduct = (details) => {
+    const product = { ...details, image: 'photo-1518837695005-2083093ee35b', id: `creator-drop-${Date.now()}`, creator: score.handle, creatorSubmitted: true };
+    setAppData((current) => ({ ...current, products: [product, ...current.products] }));
+    setModal(null);
+    announce('CREATOR DROP ADDED TO MARKETPLACE');
+  };
+
+  const sendDm = (recipient, body) => {
+    const message = {
+      id: `dm-${Date.now()}`, from: score.handle, to: recipient,
+      body: body.trim(), createdAt: new Date().toISOString(),
+    };
+    if (!message.body) return;
+    setAppData((current) => ({ ...current, messages: [...current.messages, message] }));
+  };
+
+  const openDm = (handle) => {
+    setSelectedDm(handle);
+    setActiveTab('Messages');
+    setModal(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const joinWaitlist = (email) => {
     setAppData((current) => ({ ...current, waitlistEmail: email }));
     announce('YOU ARE ON THE DROP LIST');
@@ -355,11 +420,12 @@ function App() {
 
   const checkout = () => {
     if (!appData.cart.length) return;
+    const catalog = [...appData.products, ...merchProducts];
     const order = {
       id: `GT-${Date.now().toString().slice(-7)}`,
       items: appData.cart.map((line) => ({ ...line })),
       total: appData.cart.reduce((sum, line) => {
-        const product = merchProducts.find((item) => item.id === line.productId);
+        const product = catalog.find((item) => item.id === line.productId);
         return sum + (product?.price ?? 0) * line.quantity;
       }, 0),
       createdAt: new Date().toISOString(),
@@ -409,6 +475,7 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const productCatalog = [...appData.products, ...merchProducts];
   const visibleTitles = titles
     .map((item) => ({ ...item, progress: appData.progress[item.id] ?? item.progress }))
     .filter((item) => {
@@ -420,6 +487,9 @@ function App() {
         || (filter === 'Underground' && (item.label === 'UNDERGROUND' || item.genre === 'Thriller'));
       return matchesSearch && matchesFilter;
     });
+  const watchTitles = titles
+    .map((item) => ({ ...item, progress: appData.progress[item.id] ?? item.progress }))
+    .filter((item) => `${item.title} ${item.creator} ${item.genre}`.toLowerCase().includes(search.toLowerCase()));
   const unlocked = new Set(score.achievements.map((item) => item.achievementId));
   const currentTier = getTier(score.gamerScore);
   const tierIndex = tiers.findIndex((tier) => tier.name === currentTier.name);
@@ -482,11 +552,11 @@ function App() {
               {activeTab === 'Home' && <div className="filters"><span className="filters-label">TUNE IN</span>{['For you', 'Comics', 'Shorts', 'Series', 'Underground'].map((item) => <button key={item} className={`filter-chip ${filter === item ? 'selected' : ''}`} onClick={() => setFilter(item)}>{item}</button>)}</div>}
 
               {activeTab === 'Home' && <div className="section-head"><div><span className="eyebrow">PICK UP WHERE YOU LEFT OFF</span><h2>Continue watching</h2></div><button className="text-link" onClick={() => goTo('Watch')}>VIEW ALL <ArrowUpRight size={14} /></button></div>}
-              {(activeTab === 'Home' || activeTab === 'Watch') && <div className="continue-grid">
-                {visibleTitles.filter((item) => activeTab === 'Watch' || item.progress > 0).map((item) => <MediaCard key={item.id} item={item} onAction={() => openTitle(item, 'watch')} />)}
-                {activeTab === 'Home' && visibleTitles.filter((item) => item.progress === 0).slice(0, 1).map((item) => <MediaCard key={item.id} item={item} onAction={() => openTitle(item, 'watch')} />)}
-                {activeTab === 'Watch' && visibleTitles.length === 0 && <EmptyState title="No titles on this frequency" detail="Try another filter or search term." />}
+              {activeTab === 'Home' && <div className="continue-grid">
+                {visibleTitles.filter((item) => item.progress > 0).map((item) => <MediaCard key={item.id} item={item} onAction={() => openTitle(item, 'watch')} />)}
+                {visibleTitles.filter((item) => item.progress === 0).slice(0, 1).map((item) => <MediaCard key={item.id} item={item} onAction={() => openTitle(item, 'watch')} />)}
               </div>}
+              {activeTab === 'Watch' && <WatchPage titles={watchTitles} friends={friendWatching} onWatch={(item) => openTitle(item, 'watch')} />}
 
               {activeTab === 'Home' && <><div className="section-head section-spaced"><div><span className="eyebrow">YOUR READING HISTORY</span><h2>Continue reading</h2></div><button className="text-link" onClick={() => goTo('Read')}>BROWSE COMICS <ArrowUpRight size={14} /></button></div><div className="continue-grid">{readingItems.map((item) => <MediaCard key={item.id} item={item} read onAction={() => openTitle(item, 'read')} />)}{readingItems.length === 0 && <EmptyState title="No chapters in progress" detail="Start a comic below and your place will be saved here." />}</div></>}
 
@@ -499,9 +569,10 @@ function App() {
             </>
           )}
 
-          {activeTab === 'Social' && <SocialPage posts={appData.posts} likedPosts={appData.likedPosts} handle={score.handle} onPost={publishPost} onToggleLike={toggleLike} onDeletePost={deletePost} onShare={sharePost} onRead={() => openTitle(titles[1], 'read')} />}
+          {activeTab === 'Social' && <SocialPage posts={appData.posts} following={appData.following} reposts={appData.reposts} likedPosts={appData.likedPosts} handle={score.handle} onPost={publishPost} onToggleLike={toggleLike} onToggleFollow={toggleFollow} onRepost={toggleRepost} onDeletePost={deletePost} onShare={sharePost} onMessage={openDm} onRead={() => openTitle(titles[1], 'read')} />}
           {activeTab === 'Parties' && <PartiesPage rooms={appData.rooms} onHost={() => setModal({ type: 'host-party' })} onJoin={joinParty} />}
-          {activeTab === 'Marketplace' && <MarketplacePage cart={appData.cart} orders={appData.orders} onAdd={addToCart} onOpenCart={() => setModal({ type: 'market-cart' })} />}
+          {activeTab === 'Marketplace' && <MarketplacePage products={productCatalog} cart={appData.cart} orders={appData.orders} onAdd={addToCart} onSell={() => setModal({ type: 'product-maker' })} onOpenCart={() => setModal({ type: 'market-cart' })} />}
+          {activeTab === 'Messages' && <MessagesPage handle={score.handle} selected={selectedDm} messages={appData.messages} onSelect={setSelectedDm} onSend={sendDm} />}
           {activeTab === 'Clipping' && <ClippingPage clips={appData.clips} onCreate={() => setModal({ type: 'clip-maker' })} onDelete={deleteClip} onShare={shareClip} />}
           {activeTab === 'Monthly Vote' && <VotePage month={month} votes={votes} voteCounts={voteCounts} onVote={castVote} />}
           {(activeTab === 'Profile' || activeTab === 'Trophies') && <ProfilePage score={score} waitlistEmail={appData.waitlistEmail} currentTier={currentTier} nextTier={nextTier} progress={progress} unlocked={unlocked} onTrophies={() => goTo('Trophies')} onLinkSwish={linkSwish} onEditProfile={() => setModal({ type: 'edit-profile' })} onWaitlist={() => setModal({ type: 'waitlist' })} allTrophies={showAllTrophies || activeTab === 'Trophies'} />}
@@ -511,7 +582,7 @@ function App() {
       </div>
 
       <nav className="bottom-nav" aria-label="Mobile navigation">{[...navItems, { label: 'Profile', icon: Shield }].map(({ label, icon: Icon }) => <button key={label} className={activeTab === label ? 'active' : ''} onClick={() => goTo(label)}><Icon size={18} /><span>{label === 'Profile' ? 'YOU' : label === 'Marketplace' ? 'SHOP' : label}</span>{label === 'Profile' && <i className="bottom-gs">{score.gamerScore}</i>}</button>)}</nav>
-      {toast && <div className="toast" role="status"><span className="toast-icon"><Check size={15} /></span><span>{toast}</span><button aria-label="Dismiss notification" onClick={() => setToast('')}><X size={15} /></button></div>}
+      {toast && <div className="toast" role="status"><span className={`toast-icon ${toast.includes(' GS — ') ? 'toast-xp' : ''}`}><Check size={15} /></span><span>{toast}</span><button aria-label="Dismiss notification" onClick={() => setToast('')}><X size={15} /></button></div>}
       {modal && <Modal onClose={() => setModal(null)}>
         {modal.type === 'media-watch' && <MediaExperience item={modal.item} mode="watch" progress={appData.progress[modal.item.id] ?? modal.item.progress} onProgress={(value) => setAppData((current) => ({ ...current, progress: { ...current.progress, [modal.item.id]: value } }))} onComplete={() => completeTitle(modal.item, 'watch')} />}
         {modal.type === 'media-read' && <MediaExperience item={modal.item} mode="read" readProgress={appData.readProgress[modal.item.id] ?? 1} onReadProgress={(page) => setAppData((current) => ({ ...current, readProgress: { ...current.readProgress, [modal.item.id]: page } }))} completed={appData.readTitles.includes(modal.item.id)} onComplete={() => completeTitle(modal.item, 'read')} />}
@@ -520,7 +591,8 @@ function App() {
         {modal.type === 'waitlist' && <WaitlistForm email={appData.waitlistEmail} onSubmit={joinWaitlist} />}
         {modal.type === 'edit-profile' && <ProfileForm handle={score.handle} onSubmit={updateHandle} />}
         {modal.type === 'notifications' && <Notifications score={score} posts={appData.posts} onClose={() => setModal(null)} />}
-        {modal.type === 'market-cart' && <MarketCart cart={appData.cart} onQuantity={setCartQuantity} onCheckout={checkout} onClose={() => setModal(null)} />}
+        {modal.type === 'market-cart' && <MarketCart products={productCatalog} cart={appData.cart} onQuantity={setCartQuantity} onCheckout={checkout} onClose={() => setModal(null)} />}
+        {modal.type === 'product-maker' && <ProductForm onCancel={() => setModal(null)} onSubmit={addMarketplaceProduct} />}
         {modal.type === 'order-confirmation' && <OrderConfirmation order={modal.order} onDone={() => { setModal(null); goTo('Marketplace'); }} />}
         {modal.type === 'clip-maker' && <ClipMaker onCancel={() => setModal(null)} onCreate={(clip) => { createClip(clip); setModal(null); }} />}
         {modal.type === 'menu' && <NavigationMenu onNavigate={(tab) => { setModal(null); if (tab === 'Guide') setGuideOpen(true); else goTo(tab); }} />}
@@ -579,10 +651,11 @@ function VotePage({ month, votes, voteCounts, onVote }) {
   </div>;
 }
 
-function SocialPage({ posts, likedPosts, handle, onPost, onToggleLike, onDeletePost, onShare, onRead }) {
+function SocialPage({ posts, following, reposts, likedPosts, handle, onPost, onToggleLike, onToggleFollow, onRepost, onDeletePost, onShare, onMessage, onRead }) {
   const [draft, setDraft] = useState('');
   const [mediaUrl, setMediaUrl] = useState('');
   const [showMedia, setShowMedia] = useState(false);
+  const [feed, setFeed] = useState('For You');
   const submit = (event) => {
     event.preventDefault();
     if (!draft.trim()) return;
@@ -591,19 +664,31 @@ function SocialPage({ posts, likedPosts, handle, onPost, onToggleLike, onDeleteP
     setMediaUrl('');
     setShowMedia(false);
   };
-  const feedItems = [
-    ...posts.map((post) => ({ ...post, sample: false })),
-    { id: 'sample-afterimage', content: 'Panels from chapter 04 are finally out in the world. Took three rewrites to get the silence right. Hope it finds you. #Afterimage', createdAt: new Date(Date.now() - 7200000).toISOString(), handle: '@junovale', sample: true, mediaUrl: 'https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1200&q=80', likes: 248 },
-  ];
-  return <div className="social-page"><div className="social-banner"><div><span className="eyebrow">OPEN FREQUENCY / COMMUNITY FEED</span><h2>Broadcast <em>something.</em></h2><p>Shorts, panels, field notes. Make a little noise.</p></div><span className="social-wave">〰</span></div>
+  const allPosts = [...posts.map((post) => ({ ...post, sample: false })), ...seedSocialPosts];
+  const feedItems = (feed === 'Following' ? allPosts.filter((post) => following.includes(post.handle)) : allPosts)
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  return <div className="social-page"><div className="social-banner"><div><span className="eyebrow">OPEN FREQUENCY / COMMUNITY FEED</span><h2>Broadcast <em>something.</em></h2><p>Shorts, panels, field notes. Make a little noise.</p></div><button className="messages-shortcut" onClick={() => onMessage('@junovale')}><MessageCircle size={17} /><span>MESSAGES</span></button></div>
+    <div className="social-feed-switch" role="tablist" aria-label="Social feed"><button role="tab" aria-selected={feed === 'For You'} className={feed === 'For You' ? 'selected' : ''} onClick={() => setFeed('For You')}>FOR YOU</button><button role="tab" aria-selected={feed === 'Following'} className={feed === 'Following' ? 'selected' : ''} onClick={() => setFeed('Following')}>FOLLOWING <span>{following.length}</span></button></div>
     <form className="composer panel-frame" onSubmit={submit}><span className="avatar">{handle.slice(1, 2).toUpperCase()}</span><div className="composer-body"><span className="eyebrow">NEW TRANSMISSION</span><textarea value={draft} onChange={(event) => setDraft(event.target.value.slice(0, 500))} placeholder="What are you making?" aria-label="Write a post" maxLength={500} required /><div className="composer-actions"><button type="button" className={`text-link ${showMedia ? 'media-active' : ''}`} onClick={() => setShowMedia((value) => !value)}><Video size={15} /> {showMedia ? 'REMOVE MEDIA' : 'ADD MEDIA'}</button><span className="composer-counter">{draft.length} / 500</span><button className="button button-cyan" disabled={!draft.trim()}><Send size={14} /> PUBLISH SIGNAL</button></div>{showMedia && <input className="media-url-input" type="url" value={mediaUrl} onChange={(event) => setMediaUrl(event.target.value)} placeholder="Paste an image URL (optional)" aria-label="Image URL" />}</div></form>
+    {feedItems.length === 0 && <EmptyState title="Your Following feed is quiet" detail="Follow a creator from For You to see their posts here." />}
     {feedItems.map((post) => {
       const liked = likedPosts.includes(post.id);
       const ownPost = !post.sample && post.handle === handle;
-      return <article className="feed-post" id={`post-${post.id}`} key={post.id}><div className="post-head"><span className="avatar avatar-small">{post.handle.slice(1, 2).toUpperCase()}</span><div><strong>{post.handle} {post.sample && <span>✦</span>}</strong><small>{post.sample ? 'CREATOR · ' : 'YOU · '}{new Date(post.createdAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</small></div>{ownPost && <button className="icon-button delete-post" aria-label="Delete post" onClick={() => onDeletePost(post.id)}><X size={15} /></button>}</div><p className="post-copy">{post.content}</p>{post.mediaUrl && <img className="post-image" src={post.mediaUrl} alt="Attached creator media" loading="lazy" />}
-        <div className="post-actions"><button className={liked ? 'liked' : ''} onClick={() => onToggleLike(post.id)} aria-pressed={liked}><Heart size={15} fill={liked ? 'currentColor' : 'none'} /> {(post.likes ?? 0) + (liked ? 1 : 0)}</button><button onClick={onRead}><BookOpen size={15} /> READ CHAPTER</button><button onClick={() => onShare(post.id)}><Share2 size={14} /> SHARE</button><span>{post.sample ? 'AFTERIMAGE · CH 04' : 'OPERATOR POST'}</span></div>
+      const isFollowing = following.includes(post.handle);
+      const isReposted = reposts.includes(post.id);
+      return <article className="feed-post" id={`post-${post.id}`} key={post.id}><div className="post-head"><span className="avatar avatar-small">{post.handle.slice(1, 2).toUpperCase()}</span><div><strong>{post.handle} {post.sample && <span>✦</span>}</strong><small>{post.sample ? 'CREATOR · ' : 'YOU · '}{new Date(post.createdAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</small></div>{!ownPost && <button className={`follow-action ${isFollowing ? 'is-following' : ''}`} onClick={() => onToggleFollow(post.handle)}>{isFollowing ? 'FOLLOWING' : 'FOLLOW +'}</button>}{ownPost && <button className="icon-button delete-post" aria-label="Delete post" onClick={() => onDeletePost(post.id)}><X size={15} /></button>}</div><p className="post-copy">{post.content}</p>{post.mediaUrl && <img className="post-image" src={post.mediaUrl} alt="Attached creator media" loading="lazy" />}
+        <div className="post-actions"><button className={liked ? 'liked' : ''} onClick={() => onToggleLike(post.id)} aria-pressed={liked}><Heart size={15} fill={liked ? 'currentColor' : 'none'} /> {(post.likes ?? 0) + (liked ? 1 : 0)}</button><button className={isReposted ? 'reposted' : ''} onClick={() => onRepost(post.id)} aria-pressed={isReposted}><Repeat2 size={15} /> {isReposted ? 'REPOSTED' : 'REPOST'} <span>{(post.reposts ?? 0) + (isReposted ? 1 : 0)}</span></button><button onClick={onRead}><BookOpen size={15} /> READ</button><button onClick={() => onMessage(post.handle)} aria-label={`Message ${post.handle}`}><MessageCircle size={15} /> DM</button><button onClick={() => onShare(post.id)} aria-label="Share post"><Share2 size={14} /></button><span>{post.sample ? 'CREATOR SIGNAL' : 'OPERATOR POST'}</span></div>
       </article>;
     })}
+  </div>;
+}
+
+function WatchPage({ titles: feedTitles, friends, onWatch }) {
+  const [mode, setMode] = useState('For You');
+  const friendsTitles = friends.map((friend) => ({ ...friend, title: titles.find((item) => item.id === friend.titleId) })).filter((friend) => friend.title);
+  return <div className="watch-page"><div className="watch-toolbar"><span className="eyebrow">WATCH / SHORT-FORM SIGNAL</span><div className="watch-switch" role="tablist" aria-label="Watch feed"><button role="tab" aria-selected={mode === 'For You'} className={mode === 'For You' ? 'selected' : ''} onClick={() => setMode('For You')}>FOR YOU</button><button role="tab" aria-selected={mode === 'Friends'} className={mode === 'Friends' ? 'selected' : ''} onClick={() => setMode('Friends')}>FRIENDS <Users size={13} /></button></div></div>
+    {mode === 'For You' ? <div className="reel-feed">{feedTitles.filter((item) => item.type.includes('SHORT') || item.type.includes('SERIES')).map((item, index) => <article className="reel-card" key={item.id} style={{ backgroundImage: `linear-gradient(0deg, #08070de8, #08070d10 68%), url(https://images.unsplash.com/${item.image}?auto=format&fit=crop&w=1000&q=85)` }}><span className="reel-index">SIGNAL 0{index + 1}</span><div className="reel-copy"><span className="eyebrow">{item.type} · {item.genre.toUpperCase()}</span><h2>{item.title}</h2><p>By {item.creator} · {item.label}</p><button className="button button-cyan" onClick={() => onWatch(item)}><Play size={14} fill="currentColor" /> WATCH NOW</button></div><button className="reel-play" onClick={() => onWatch(item)} aria-label={`Play ${item.title}`}><Play size={21} fill="currentColor" /></button></article>)}</div>
+      : <div className="friend-watch-list">{friendsTitles.map((friend) => <article className="friend-watch-card" key={friend.handle}><div className="friend-watch-art" style={{ backgroundImage: `linear-gradient(0deg, #08070dcc, #08070d08), url(https://images.unsplash.com/${friend.title.image}?auto=format&fit=crop&w=650&q=80)` }}><span className="watching-now"><i /> WATCHING NOW</span><span>{friend.title.title}</span></div><div className="friend-watch-meta"><span className="avatar avatar-small">{friend.name.slice(0, 1).toUpperCase()}</span><div><strong>{friend.name} <small>{friend.handle}</small></strong><span>{friend.note} · {friend.progress}% through</span></div><button className="button button-outline" onClick={() => onWatch(friend.title)}><Play size={13} /> JOIN IN</button></div></article>)}</div>}
   </div>;
 }
 
@@ -706,24 +791,54 @@ function WelcomeGuide({ onClose }) {
   </div>;
 }
 
-function MarketplacePage({ cart, orders, onAdd, onOpenCart }) {
+function MarketplacePage({ products, cart, orders, onAdd, onSell, onOpenCart }) {
   const [category, setCategory] = useState('ALL DROPS');
-  const categories = ['ALL DROPS', 'APPAREL', 'PRINT', 'OBJECTS'];
-  const products = category === 'ALL DROPS' ? merchProducts : merchProducts.filter((item) => item.category === category);
+  const categories = ['ALL DROPS', 'APPAREL', 'PRINT', 'OBJECTS', 'CREATOR'];
+  const visibleProducts = products.filter((item) => category === 'ALL DROPS'
+    || (category === 'CREATOR' ? item.creatorSubmitted : item.category === category));
   const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
-  return <div className="marketplace-page"><section className="market-hero"><div><span className="eyebrow">GLITCH MARKET / CREATOR-LED GOODS</span><h2>Keep a piece<br />of the <em>signal.</em></h2><p>Limited drops connected to the stories and creators you follow.</p></div><div className="market-bag"><ShoppingBag size={26} /><span>DROP_01 / NO CHECKOUT GATE</span></div></section>
+  return <div className="marketplace-page"><section className="market-hero"><div><span className="eyebrow">GLITCH MARKET / CREATOR-LED GOODS</span><h2>Keep a piece<br />of the <em>signal.</em></h2><p>Limited drops connected to the stories and creators you follow.</p><button className="button button-cyan sell-drop-button" onClick={onSell}><Plus size={14} /> POST A DROP</button></div><div className="market-bag"><ShoppingBag size={26} /><span>DROP_01 / NO CHECKOUT GATE</span></div></section>
     <div className="market-toolbar"><div className="market-filters">{categories.map((item) => <button key={item} className={category === item ? 'selected' : ''} onClick={() => setCategory(item)}>{item}</button>)}</div><button className="button button-outline market-cart-button" onClick={onOpenCart}><ShoppingCart size={15} /> DROP BAG <span>{cartCount}</span></button></div>
-    <div className="market-grid">{products.map((product, index) => { const quantity = cart.find((item) => item.productId === product.id)?.quantity ?? 0; return <article className="product-card" key={product.id}><div className={`product-art product-art-${index % 4}`} style={{ backgroundImage: `linear-gradient(0deg, #08070bd0, #08070b08 62%), url(https://images.unsplash.com/${product.image}?auto=format&fit=crop&w=900&q=80)` }}><span>{product.category}</span><span className="product-edition">GLITCH DROP / 0{index + 1}</span></div><div className="product-info"><div><span className="eyebrow">BY {product.creator.toUpperCase()}</span><h3>{product.title}</h3><p>{product.description}</p></div><div className="product-purchase"><strong>${product.price}</strong><button className="button button-cyan" onClick={() => onAdd(product)}>{quantity ? <><Check size={13} /> IN BAG · {quantity}</> : <><Plus size={13} /> ADD TO BAG</>}</button></div></div></article>; })}</div>
+    <div className="market-grid">{visibleProducts.map((product, index) => { const quantity = cart.find((item) => item.productId === product.id)?.quantity ?? 0; const image = product.imageUrl || `https://images.unsplash.com/${product.image}?auto=format&fit=crop&w=900&q=80`; return <article className="product-card" key={product.id}><div className={`product-art product-art-${index % 4}`} style={{ backgroundImage: `linear-gradient(0deg, #08070bd0, #08070b08 62%), url("${image}")` }}><span>{product.category}</span><span className="product-edition">{product.creatorSubmitted ? 'CREATOR DROP' : `GLITCH DROP / 0${index + 1}`}</span></div><div className="product-info"><div><span className="eyebrow">BY {product.creator.toUpperCase()}</span><h3>{product.title}</h3><p>{product.description}</p></div><div className="product-purchase"><strong>${product.price}</strong><button className="button button-cyan" onClick={() => onAdd(product)}>{quantity ? <><Check size={13} /> IN BAG · {quantity}</> : <><Plus size={13} /> ADD TO BAG</>}</button></div></div></article>; })}{visibleProducts.length === 0 && <EmptyState title="No creator drops yet" detail="Post the first item from your creator account." />}</div>
     <section className="market-terms"><CircleDollarSign size={19} /><div><strong>Creator-linked by design.</strong><span>Each drop is presented with its creator. Orders and checkout are local demos; no payment is collected and nothing ships in this preview.</span></div><Sparkles size={15} /></section>
     {orders.length > 0 && <section className="market-orders"><span className="eyebrow">LOCAL DEMO RECEIPTS</span><h3>Your recent orders</h3>{orders.slice(0, 3).map((order) => <div key={order.id}><span>{order.id}</span><span>{order.items.reduce((sum, item) => sum + item.quantity, 0)} items</span><strong>${order.total.toFixed(2)}</strong></div>)}</section>}
   </div>;
 }
 
-function MarketCart({ cart, onQuantity, onCheckout, onClose }) {
-  const lines = cart.map((line) => ({ ...line, product: merchProducts.find((product) => product.id === line.productId) })).filter((line) => line.product);
+function MarketCart({ products, cart, onQuantity, onCheckout, onClose }) {
+  const lines = cart.map((line) => ({ ...line, product: products.find((product) => product.id === line.productId) })).filter((line) => line.product);
   const total = lines.reduce((sum, line) => sum + line.product.price * line.quantity, 0);
   return <div className="market-cart-dialog"><span className="eyebrow">GLITCH MARKET / YOUR BAG</span><h2>Drop bag.</h2>{lines.length ? <div className="cart-lines">{lines.map((line) => <div className="cart-line" key={line.productId}><div className="cart-thumb" style={{ backgroundImage: `url(https://images.unsplash.com/${line.product.image}?auto=format&fit=crop&w=200&q=75)` }} /><div className="cart-description"><strong>{line.product.title}</strong><span>${line.product.price} · {line.product.creator}</span><div className="cart-quantity"><button onClick={() => onQuantity(line.productId, line.quantity - 1)} aria-label="Decrease quantity"><Minus size={12} /></button><span>{line.quantity}</span><button onClick={() => onQuantity(line.productId, line.quantity + 1)} aria-label="Increase quantity"><Plus size={12} /></button></div></div><strong className="cart-line-total">${(line.product.price * line.quantity).toFixed(2)}</strong></div>)}</div> : <div className="cart-empty"><ShoppingBag size={22} /><strong>Your drop bag is empty.</strong><span>Explore the latest creator drops.</span></div>}
     <div className="cart-total"><span>DEMO ORDER TOTAL</span><strong>${total.toFixed(2)}</strong></div><p className="cart-disclaimer">Preview only. No payment details are requested and no order will be fulfilled.</p><div className="form-actions"><button className="button button-outline" onClick={onClose}>KEEP BROWSING</button><button className="button button-cyan" onClick={onCheckout} disabled={!lines.length}><Check size={14} /> PLACE DEMO ORDER</button></div></div>;
+}
+
+function ProductForm({ onCancel, onSubmit }) {
+  const [title, setTitle] = useState('');
+  const [category, setCategory] = useState('APPAREL');
+  const [price, setPrice] = useState('24');
+  const [description, setDescription] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+  return <form className="dialog-form product-form" onSubmit={(event) => { event.preventDefault(); onSubmit({ title: title.trim(), category, price: Number(price), description: description.trim(), imageUrl: imageUrl.trim() }); }}><span className="eyebrow">CREATOR MARKET / NEW LISTING</span><h2>Post a drop.</h2><p>Listings are saved to this browser’s demo marketplace. No payment or fulfillment is connected.</p><label>ITEM NAME<input autoFocus value={title} onChange={(event) => setTitle(event.target.value)} maxLength={60} placeholder="Creator drop name" required /></label><div className="form-row"><label>CATEGORY<select value={category} onChange={(event) => setCategory(event.target.value)}><option>APPAREL</option><option>PRINT</option><option>OBJECTS</option></select></label><label>DEMO PRICE · USD<input type="number" min="1" max="10000" value={price} onChange={(event) => setPrice(event.target.value)} required /></label></div><label>DESCRIPTION<textarea value={description} onChange={(event) => setDescription(event.target.value.slice(0, 180))} maxLength={180} placeholder="What makes this drop special?" required /></label><label>IMAGE URL · OPTIONAL<input type="url" value={imageUrl} onChange={(event) => setImageUrl(event.target.value)} placeholder="https://..." /></label><div className="form-actions"><button type="button" className="button button-outline" onClick={onCancel}>CANCEL</button><button className="button button-cyan"><ShoppingBag size={14} /> POST TO MARKET</button></div></form>;
+}
+
+const dmContacts = [
+  { handle: '@junovale', name: 'Juno Vale', note: 'Creator · Afterimage' },
+  { handle: '@kira.exe', name: 'Kira', note: 'Operator · Watch parties' },
+  { handle: '@mori_k', name: 'Mori_K', note: 'Creator · Ghostline 09' },
+  { handle: '@minacho', name: 'Mina Cho', note: 'Creator · Soft Reset' },
+];
+
+function MessagesPage({ handle, selected, messages, onSelect, onSend }) {
+  const [draft, setDraft] = useState('');
+  const thread = messages.filter((message) => (message.from === handle && message.to === selected) || (message.from === selected && message.to === handle));
+  const contact = dmContacts.find((item) => item.handle === selected) ?? { handle: selected, name: selected, note: 'GLITCH operator' };
+  const submit = (event) => {
+    event.preventDefault();
+    if (!draft.trim()) return;
+    onSend(selected, draft);
+    setDraft('');
+  };
+  return <div className="messages-page"><div className="messages-heading"><div><span className="eyebrow">PRIVATE SIGNAL / LOCAL DEMO</span><h2>Direct messages</h2></div><span className="dm-privacy"><LockKeyhole size={13} /> DEVICE ONLY</span></div><div className="dm-layout"><aside className="dm-contacts" aria-label="Message contacts"><span className="eyebrow">YOUR PEOPLE</span>{dmContacts.map((person) => { const unreadCount = messages.filter((message) => message.from === person.handle && message.to === handle).length; return <button key={person.handle} className={selected === person.handle ? 'active' : ''} onClick={() => onSelect(person.handle)}><span className="avatar avatar-small">{person.name.slice(0, 1)}</span><span><strong>{person.name}</strong><small>{person.note}</small></span>{unreadCount > 0 && <i>{unreadCount}</i>}</button>; })}</aside><section className="dm-thread"><header><span className="avatar avatar-small">{contact.name.slice(0, 1)}</span><div><strong>{contact.name}</strong><small>{contact.handle} · messages stay on this device</small></div></header><div className="dm-history">{thread.length ? thread.map((message) => <article key={message.id} className={`dm-bubble ${message.from === handle ? 'outgoing' : 'incoming'}`}><p>{message.body}</p><time>{new Date(message.createdAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</time></article>) : <EmptyState title={`Start a conversation with ${contact.name}`} detail="Send a direct message to begin this local demo thread." />}</div><form className="dm-composer" onSubmit={submit}><input value={draft} onChange={(event) => setDraft(event.target.value.slice(0, 500))} maxLength={500} placeholder={`Message ${contact.name}...`} aria-label="Direct message" required /><button className="button button-cyan" disabled={!draft.trim()} aria-label="Send direct message"><Send size={15} /></button></form></section></div></div>;
 }
 
 function OrderConfirmation({ order, onDone }) {
