@@ -69,7 +69,7 @@ const seedRooms = [
 
 const initialAppData = {
   posts: [], rooms: seedRooms, watchedTitles: [], readTitles: [], progress: {}, likedPosts: [], waitlistEmail: '',
-  cart: [], orders: [], clips: [],
+  cart: [], orders: [], clips: [], readProgress: {},
 };
 
 const initialVoteCounts = Object.fromEntries(
@@ -84,7 +84,7 @@ const tiers = [
 const navItems = [
   { label: 'Home', icon: Home }, { label: 'Watch', icon: Play }, { label: 'Read', icon: BookOpen },
   { label: 'Social', icon: Users }, { label: 'Parties', icon: Headphones },
-  { label: 'Clipping', icon: Scissors }, { label: 'Marketplace', icon: ShoppingBag },
+  { label: 'Marketplace', icon: ShoppingBag },
 ];
 
 function getTier(score) {
@@ -244,6 +244,7 @@ function App() {
       ...current,
       [listKey]: current[listKey].includes(item.id) ? current[listKey] : [...current[listKey], item.id],
       progress: mode === 'watch' ? { ...current.progress, [item.id]: 100 } : current.progress,
+      readProgress: mode === 'read' ? { ...current.readProgress, [item.id]: 3 } : current.readProgress,
     }));
     if (!alreadyComplete) {
       incrementStat(mode === 'watch' ? 'titlesWatched' : 'chaptersRead');
@@ -424,6 +425,9 @@ function App() {
   const tierIndex = tiers.findIndex((tier) => tier.name === currentTier.name);
   const nextTier = tiers[tierIndex + 1];
   const progress = nextTier ? Math.min(100, ((score.gamerScore - currentTier.min) / (nextTier.min - currentTier.min)) * 100) : 100;
+  const readingItems = visibleTitles
+    .filter((item) => item.type.includes('COMIC') && (appData.readProgress[item.id] ?? 1) > 1 && !appData.readTitles.includes(item.id))
+    .map((item) => ({ ...item, progress: Math.round(((appData.readProgress[item.id] - 1) / 2) * 100), label: 'CONTINUE READING' }));
 
   return (
     <div className="app-shell">
@@ -484,10 +488,12 @@ function App() {
                 {activeTab === 'Watch' && visibleTitles.length === 0 && <EmptyState title="No titles on this frequency" detail="Try another filter or search term." />}
               </div>}
 
+              {activeTab === 'Home' && <><div className="section-head section-spaced"><div><span className="eyebrow">YOUR READING HISTORY</span><h2>Continue reading</h2></div><button className="text-link" onClick={() => goTo('Read')}>BROWSE COMICS <ArrowUpRight size={14} /></button></div><div className="continue-grid">{readingItems.map((item) => <MediaCard key={item.id} item={item} read onAction={() => openTitle(item, 'read')} />)}{readingItems.length === 0 && <EmptyState title="No chapters in progress" detail="Start a comic below and your place will be saved here." />}</div></>}
+
               {activeTab === 'Home' && <div className="section-head section-spaced"><div><span className="eyebrow">THE FEED IS MOVING</span><h2>Trending now <span className="live-pill"><span className="status-dot" /> LIVE</span></h2></div><button className="text-link" onClick={() => goTo('Watch')}>EXPLORE <ArrowUpRight size={14} /></button></div>}
               {activeTab === 'Home' && <div className="trending-row">{visibleTitles.slice(1, 4).map((item, index) => <div className="trend-item" key={item.id}><span className="trend-rank">0{index + 1}</span><div className="trend-thumb" style={{ backgroundImage: `url(https://images.unsplash.com/${item.image}?auto=format&fit=crop&w=180&q=70)` }} /><div className="trend-info"><strong>{item.title}</strong><span>{item.type} <i>·</i> {item.creator}</span></div><span className="trend-change">↗ {98 - index * 11}%</span><button className="icon-button trend-play" aria-label={`Play ${item.title}`} onClick={() => openTitle(item, 'watch')}><Play size={15} /></button></div>)}</div>}
 
-              {(activeTab === 'Home' || activeTab === 'Read') && <><div className="section-head section-spaced"><div><span className="eyebrow">FRESH FROM THE UNDERGROUND</span><h2>{activeTab === 'Read' ? 'Read next' : 'Stories worth your time'}</h2></div><button className="text-link" onClick={() => goTo('Read')}>BROWSE COMICS <ArrowUpRight size={14} /></button></div><div className="story-grid">{visibleTitles.filter((item) => item.type.includes('COMIC')).map((item) => <MediaCard key={item.id} item={item} onAction={() => openTitle(item, 'read')} read />)}{activeTab === 'Read' && visibleTitles.filter((item) => item.type.includes('COMIC')).length === 0 && <EmptyState title="No chapters match" detail="Try another filter or search term." />}</div></>}
+              {(activeTab === 'Home' || activeTab === 'Read') && <><div className="section-head section-spaced"><div><span className="eyebrow">FRESH FROM THE UNDERGROUND</span><h2>{activeTab === 'Read' ? 'Read next' : 'Stories worth your time'}</h2></div><button className="text-link" onClick={() => goTo('Read')}>BROWSE COMICS <ArrowUpRight size={14} /></button></div><div className="story-grid">{visibleTitles.filter((item) => item.type.includes('COMIC')).map((item) => <MediaCard key={item.id} item={{ ...item, progress: Math.max(0, Math.round((((appData.readProgress[item.id] ?? 1) - 1) / 2) * 100)), label: appData.readProgress[item.id] > 1 ? 'CONTINUE READING' : 'NEW CHAPTER' }} onAction={() => openTitle(item, 'read')} read />)}{activeTab === 'Read' && visibleTitles.filter((item) => item.type.includes('COMIC')).length === 0 && <EmptyState title="No chapters match" detail="Try another filter or search term." />}</div></>}
 
               {activeTab === 'Home' && <Leaderboard score={score} onOpen={() => goTo('Monthly Vote')} />}
             </>
@@ -504,11 +510,11 @@ function App() {
         </main>
       </div>
 
-      <nav className="bottom-nav" aria-label="Mobile navigation">{[...navItems, { label: 'Profile', icon: Shield }].map(({ label, icon: Icon }) => <button key={label} className={activeTab === label ? 'active' : ''} onClick={() => goTo(label)}><Icon size={18} /><span>{label === 'Profile' ? 'YOU' : label === 'Marketplace' ? 'SHOP' : label === 'Clipping' ? 'CLIPS' : label}</span>{label === 'Profile' && <i className="bottom-gs">{score.gamerScore}</i>}</button>)}</nav>
+      <nav className="bottom-nav" aria-label="Mobile navigation">{[...navItems, { label: 'Profile', icon: Shield }].map(({ label, icon: Icon }) => <button key={label} className={activeTab === label ? 'active' : ''} onClick={() => goTo(label)}><Icon size={18} /><span>{label === 'Profile' ? 'YOU' : label === 'Marketplace' ? 'SHOP' : label}</span>{label === 'Profile' && <i className="bottom-gs">{score.gamerScore}</i>}</button>)}</nav>
       {toast && <div className="toast" role="status"><span className="toast-icon"><Check size={15} /></span><span>{toast}</span><button aria-label="Dismiss notification" onClick={() => setToast('')}><X size={15} /></button></div>}
       {modal && <Modal onClose={() => setModal(null)}>
         {modal.type === 'media-watch' && <MediaExperience item={modal.item} mode="watch" progress={appData.progress[modal.item.id] ?? modal.item.progress} onProgress={(value) => setAppData((current) => ({ ...current, progress: { ...current.progress, [modal.item.id]: value } }))} onComplete={() => completeTitle(modal.item, 'watch')} />}
-        {modal.type === 'media-read' && <MediaExperience item={modal.item} mode="read" completed={appData.readTitles.includes(modal.item.id)} onComplete={() => completeTitle(modal.item, 'read')} />}
+        {modal.type === 'media-read' && <MediaExperience item={modal.item} mode="read" readProgress={appData.readProgress[modal.item.id] ?? 1} onReadProgress={(page) => setAppData((current) => ({ ...current, readProgress: { ...current.readProgress, [modal.item.id]: page } }))} completed={appData.readTitles.includes(modal.item.id)} onComplete={() => completeTitle(modal.item, 'read')} />}
         {modal.type === 'host-party' && <PartyForm onCancel={() => setModal(null)} onSubmit={makeParty} />}
         {modal.type === 'party-room' && <PartyRoom room={modal.room} onLeave={() => joinParty(modal.room)} />}
         {modal.type === 'waitlist' && <WaitlistForm email={appData.waitlistEmail} onSubmit={joinWaitlist} />}
@@ -613,16 +619,22 @@ function Modal({ children, onClose }) {
   return <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}><section className="modal-shell" role="dialog" aria-modal="true" aria-label="GLITCH TV dialog"><button className="modal-close icon-button" onClick={onClose} aria-label="Close dialog"><X size={17} /></button>{children}</section></div>;
 }
 
-function MediaExperience({ item, mode, progress = 0, completed = false, onProgress, onComplete }) {
+function MediaExperience({ item, mode, progress = 0, readProgress = 1, onReadProgress, completed = false, onProgress, onComplete }) {
   const isRead = mode === 'read';
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(readProgress);
+  useEffect(() => setPage(readProgress), [readProgress, item.id]);
+  const changePage = (nextPage) => {
+    const boundedPage = Math.max(1, Math.min(3, nextPage));
+    setPage(boundedPage);
+    onReadProgress?.(boundedPage);
+  };
   const pages = [
     `${item.title} opens on a city that never learned how to sleep. Above the transit line, a single signal blinks out of rhythm with every other light.`,
     `The message has no sender, no timestamp, no trace in the network. Only a route through the old district, where the cameras stopped watching years ago.`,
     `At the edge of the frame, someone looks up. The signal changes. For the first time tonight, the city goes quiet.`,
   ];
   return <div className={`media-experience ${isRead ? 'reader-experience' : ''}`}><span className="eyebrow">{isRead ? 'READING MODE / CHAPTER 01' : 'PLAYBACK MODE / DEMO TITLE'}</span><h2>{item.title}</h2><p className="media-byline">{item.type} <i>·</i> {item.creator}</p>
-    {isRead ? <div className="reader-content"><span className="reader-page-count">PAGE {String(page).padStart(2, '0')} / 03</span><p>{pages[page - 1]}</p><div className="reader-controls"><button className="button button-outline" disabled={page === 1} onClick={() => setPage((value) => value - 1)}>PREVIOUS</button><button className="button button-outline" disabled={page === pages.length} onClick={() => setPage((value) => value + 1)}>NEXT PAGE <ChevronRight size={13} /></button></div></div>
+    {isRead ? <div className="reader-content"><span className="reader-page-count">PAGE {String(page).padStart(2, '0')} / 03</span><p>{pages[page - 1]}</p><div className="reader-controls"><button className="button button-outline" disabled={page === 1} onClick={() => changePage(page - 1)}>PREVIOUS</button><button className="button button-outline" disabled={page === pages.length} onClick={() => changePage(page + 1)}>NEXT PAGE <ChevronRight size={13} /></button></div></div>
       : <div className="playback-preview" style={{ backgroundImage: `linear-gradient(0deg, #08080ed9, #09091016), url(https://images.unsplash.com/${item.image}?auto=format&fit=crop&w=1100&q=80)` }}><span className="playback-label"><Radio size={14} /> GLITCH ORIGINAL / PREVIEW</span><span className="playback-title">{item.title}</span></div>}
     {!isRead && <div className="playback-progress"><div className="tier-progress-label"><span>PLAYBACK POSITION</span><span>{progress}%</span></div><input aria-label="Playback position" type="range" min="0" max="100" step="5" value={progress} onChange={(event) => onProgress(Number(event.target.value))} /></div>}
     <div className="experience-footer"><span>{isRead ? (completed ? 'CHAPTER PREVIOUSLY COMPLETED' : `PAGE ${page} OF ${pages.length}`) : 'DEMO CONTENT · PROGRESS SAVES LOCALLY'}</span><button className="button button-cyan" onClick={onComplete} disabled={isRead && completed}>{isRead ? completed ? <><Check size={14} /> COMPLETED</> : <><BookOpen size={14} /> MARK CHAPTER READ</> : <><Check size={14} /> COMPLETE TITLE</>}</button></div>
@@ -666,8 +678,8 @@ function LoadingScreen() {
 const guideSlides = [
   { eyebrow: 'WELCOME TO THE UNDERGROUND', title: <>Stories break<br />through here.</>, body: 'GLITCH is an independent story network for comics, short films, and original series from creators working outside the usual channels.', image: 'photo-1519608487953-e999c86e7455', label: 'INDEPENDENT STORIES · ONE SIGNAL' },
   { eyebrow: '01 / DISCOVER', title: <>Find your next<br />rabbit hole.</>, body: 'Explore the watch and read catalog, follow what is trending, pick up where you stopped, and discover new voices by genre.', image: 'photo-1535223289827-42f1e9919769', label: 'WATCH · READ · FOLLOW' },
-  { eyebrow: '02 / MAKE & SHARE', title: <>Make noise.<br />Bring people in.</>, body: 'Post a signal, host a watch or read party, and create shareable clip markers from a title. Clip rendering is a demo workflow until source-video tools connect.', image: 'photo-1516280440614-37939bbacd81', label: 'SOCIAL · PARTIES · CLIPPING' },
-  { eyebrow: '03 / SUPPORT CREATORS', title: <>Your attention<br />has a signal.</>, body: 'Vote for monthly favorites, earn Gamer Score, and shop creator-linked drops. Future clip campaigns could share sponsor-funded revenue with rights holders.', image: 'photo-1513364776144-60967b0f800f', label: 'VOTE · EARN · SHOP' },
+  { eyebrow: '02 / MAKE & SHARE', title: <>Make noise.<br />Bring people in.</>, body: 'Post a signal, follow creator updates, and host a watch or read party with the community.', image: 'photo-1516280440614-37939bbacd81', label: 'SOCIAL · PARTIES' },
+  { eyebrow: '03 / SUPPORT CREATORS', title: <>Your attention<br />has a signal.</>, body: 'Vote for monthly favorites, earn Gamer Score, and shop creator-linked drops. Future sponsor-funded programs could send more value back to the creators.', image: 'photo-1513364776144-60967b0f800f', label: 'VOTE · EARN · SHOP' },
 ];
 
 function WelcomeGuide({ onClose }) {

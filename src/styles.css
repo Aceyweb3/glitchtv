@@ -177,6 +177,7 @@ kbd { font: 9px var(--mono); border: 1px solid #30303a; padding: 2px 4px; color:
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; } }
 
 :root { --cyan: #a66bff; --purple: #a66bff; --purple-dim: #7650c9; }
+@media (max-width: 760px) { .bottom-nav { grid-template-columns: repeat(7, minmax(0, 1fr)); } }
 .button-cyan:hover { background: #bf9aff; box-shadow: 0 0 20px #a66bff55; }
 .button-outline:hover, .text-link:hover { color: #d3b9ff; }
 .glitch-word { position: relative; display: inline-block; text-shadow: 2px 0 #a66bff52, -2px 0 #ff2a6d3b; animation: hero-signal-glitch 3.2s steps(1, end) infinite; }
