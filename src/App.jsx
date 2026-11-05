@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   ArrowDownRight, ArrowLeft, ArrowRight, ArrowUpRight, Bell, BookOpen, Check,
   ChevronLeft, ChevronRight, CircleDollarSign, Clock3, Compass, Copy, Disc3, Flame,
-  Gamepad2, Headphones, Heart, Home, Info, LockKeyhole, LogOut, Menu, MessageCircle, Minus, Play, Plus, Radio,
+  Headphones, Heart, Home, Info, LockKeyhole, LogOut, Menu, MessageCircle, Minus, Play, Plus, Radio,
   Repeat2, Scissors, Search, Send, Share2, Shield, ShoppingBag, ShoppingCart, Sparkles,
   Trash2, Trophy, Users, Video, X,
 } from 'lucide-react';
@@ -17,15 +17,15 @@ const achievements = [
   { id: 'party_join', name: 'On the guest list', description: 'Join a party', points: 15, icon: '↗', category: 'social' },
   { id: 'first_post', name: 'Broadcast live', description: 'Publish your first short, comic, or video', points: 20, icon: '⌁', category: 'create' },
   { id: 'creator_1k', name: 'First thousand', description: 'Reach 1,000 views on a piece', points: 100, icon: '◌', category: 'create', comingSoon: true },
-  { id: 'swish_linked', name: 'Street connected', description: 'Link a SWISH profile', points: 50, icon: '⌘', category: 'swish' },
-  { id: 'swish_first_win', name: 'First blood', description: 'Win your first SWISH match', points: 30, icon: '✦', category: 'swish', comingSoon: true },
+  { id: 'creator_network', name: 'Creator network', description: 'Activate the YUGAMI creator network', points: 50, icon: '⌘', category: 'community' },
+  { id: 'creator_collab', name: 'First collaboration', description: 'Join a creator collaboration', points: 30, icon: '✦', category: 'community', comingSoon: true },
 ];
 
 const initialScore = {
   userId: 'operator-001', handle: '@nightshift', gamerScore: 0, tier: 'Bronze',
   achievements: [], monthlyVotes: 0, voteMonth: new Date().toISOString().slice(0, 7),
   stats: { titlesWatched: 0, chaptersRead: 0, votesCast: 0, partiesHosted: 0, postsCreated: 0 },
-  discovered: [], linkedSwish: false,
+  discovered: [], creatorNetworkEnabled: false,
 };
 
 const titles = [
@@ -108,7 +108,7 @@ function getTier(score) {
 
 function loadScore() {
   try {
-    const saved = JSON.parse(localStorage.getItem('glitchtv-score'));
+    const saved = JSON.parse(localStorage.getItem('yugami-score'));
     if (saved && saved.stats && Array.isArray(saved.achievements)) {
       const voteMonth = new Date().toISOString().slice(0, 7);
       return {
@@ -126,7 +126,7 @@ function loadScore() {
 
 function loadAppData() {
   try {
-    const saved = JSON.parse(localStorage.getItem('glitchtv-app-data'));
+    const saved = JSON.parse(localStorage.getItem('yugami-app-data'));
     if (saved && typeof saved === 'object') return { ...initialAppData, ...saved };
   } catch {
     // Start with a clean local app state if stored data is invalid.
@@ -166,21 +166,21 @@ function App() {
   const seenUnlocks = useRef(new Set(score.achievements.map((item) => item.achievementId)));
   const month = new Date().toLocaleString('en', { month: 'long' });
   const monthKey = new Date().toISOString().slice(0, 7);
-  const votesKey = `glitchtv-votes-${monthKey}`;
-  const voteCountsKey = `glitchtv-vote-counts-${monthKey}`;
+  const votesKey = `yugami-votes-${monthKey}`;
+  const voteCountsKey = `yugami-vote-counts-${monthKey}`;
   const [votes, setVotes] = useState(() => {
     try { return JSON.parse(localStorage.getItem(votesKey)) ?? {}; } catch { return {}; }
   });
   const [voteCounts, setVoteCounts] = useState(() => loadVoteCounts(voteCountsKey));
 
-  useEffect(() => localStorage.setItem('glitchtv-score', JSON.stringify(score)), [score]);
-  useEffect(() => localStorage.setItem('glitchtv-app-data', JSON.stringify(appData)), [appData]);
+  useEffect(() => localStorage.setItem('yugami-score', JSON.stringify(score)), [score]);
+  useEffect(() => localStorage.setItem('yugami-app-data', JSON.stringify(appData)), [appData]);
   useEffect(() => localStorage.setItem(votesKey, JSON.stringify(votes)), [votes, votesKey]);
   useEffect(() => localStorage.setItem(voteCountsKey, JSON.stringify(voteCounts)), [voteCounts, voteCountsKey, votesKey]);
   useEffect(() => {
     const timeout = window.setTimeout(() => {
       setIsLoading(false);
-      setGuideOpen(localStorage.getItem('glitchtv-guide-seen') !== 'true');
+      setGuideOpen(localStorage.getItem('yugami-guide-seen') !== 'true');
     }, 950);
     return () => window.clearTimeout(timeout);
   }, []);
@@ -332,10 +332,10 @@ function App() {
     }
   };
 
-  const linkSwish = () => {
-    if (!score.linkedSwish) {
-      setScore((current) => ({ ...current, linkedSwish: true }));
-      award('swish_linked');
+  const activateCreatorNetwork = () => {
+    if (!score.creatorNetworkEnabled) {
+      setScore((current) => ({ ...current, creatorNetworkEnabled: true }));
+      award('creator_network');
     }
   };
 
@@ -456,7 +456,7 @@ function App() {
   };
 
   const finishGuide = () => {
-    localStorage.setItem('glitchtv-guide-seen', 'true');
+    localStorage.setItem('yugami-guide-seen', 'true');
     setGuideOpen(false);
   };
 
@@ -502,9 +502,9 @@ function App() {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <button className="brand" onClick={() => goTo('Home')} aria-label="GLITCH TV home">
+        <button className="brand" onClick={() => goTo('Home')} aria-label="YUGAMI home">
           <span className="brand-mark"><Disc3 size={19} strokeWidth={2.2} /></span>
-          <span><span className="brand-wordmark" data-text="GLITCH">GLITCH</span><span className="brand-tv">TV</span><small>STORIES FROM THE EDGE</small></span>
+          <span><span className="brand-wordmark" data-text="YUGAMI">YUGAMI</span><small>OPEN STREAM NETWORK</small></span>
         </button>
         <div className="topbar-search">
           <Search size={16} />
@@ -535,7 +535,7 @@ function App() {
         <main className="main-content">
           <div className="mobile-greeting"><span className="eyebrow"><span className="status-dot" /> SIGNAL DETECTED</span><button className="mobile-avatar" onClick={() => goTo('Profile')} aria-label="Open operator profile">{score.handle.slice(1, 2).toUpperCase()}</button></div>
           <div className="page-heading">
-            <div><span className="eyebrow">{activeTab === 'Home' ? 'FRIDAY, OCTOBER 23' : 'GLITCH NETWORK / ' + activeTab.toUpperCase()}</span><h1>{activeTab === 'Home' ? <>Your next <em>obsession.</em></> : activeTab === 'Monthly Vote' ? <>Monthly <em>Top 15.</em></> : activeTab === 'Trophies' ? <>Trophy <em>case.</em></> : activeTab === 'Profile' ? <>Operator <em>profile.</em></> : <>{activeTab}<em>.</em></>}</h1></div>
+            <div><span className="eyebrow">{activeTab === 'Home' ? 'OPEN STREAM NETWORK' : 'YUGAMI NETWORK / ' + activeTab.toUpperCase()}</span><h1>{activeTab === 'Home' ? <>Your next <em>obsession.</em></> : activeTab === 'Monthly Vote' ? <>Monthly <em>Top 15.</em></> : activeTab === 'Trophies' ? <>Trophy <em>case.</em></> : activeTab === 'Profile' ? <>Operator <em>profile.</em></> : <>{activeTab}<em>.</em></>}</h1></div>
             <button className="round-action" aria-label="Open navigation" onClick={() => setModal({ type: 'menu' })}><Menu size={18} /></button>
           </div>
 
@@ -544,7 +544,7 @@ function App() {
               {activeTab === 'Home' && <section className="hero-feature">
                 <img src="https://images.unsplash.com/photo-1535223289827-42f1e9919769?auto=format&fit=crop&w=1700&q=85" alt="Neon-lit city at night" />
                 <div className="hero-scanline" />
-                <div className="hero-copy"><span className="eyebrow"><Flame size={13} /> GLITCH ORIGINAL · NEW EPISODE</span><h2>NEON<br /><strong className="glitch-word" data-text="VEIL">VEIL</strong></h2><p>In a city that sells your memories, one signal refuses to disappear.</p><div className="hero-meta"><span>SCI-FI THRILLER</span><span>·</span><span>8 EPISODES</span><span className="rating">✦ 9.2</span></div><button className="button button-cyan" onClick={() => openTitle(titles[0], 'watch')}><Play size={15} fill="currentColor" /> RESUME EPISODE</button></div>
+                <div className="hero-copy"><span className="eyebrow"><Flame size={13} /> YUGAMI ORIGINAL · NEW EPISODE</span><h2>NEON<br /><strong className="glitch-word" data-text="VEIL">VEIL</strong></h2><p>In a city that sells your memories, one signal refuses to disappear.</p><div className="hero-meta"><span>SCI-FI THRILLER</span><span>·</span><span>8 EPISODES</span><span className="rating">✦ 9.2</span></div><button className="button button-cyan" onClick={() => openTitle(titles[0], 'watch')}><Play size={15} fill="currentColor" /> RESUME EPISODE</button></div>
                 <div className="hero-index"><span>01 / 04</span><span className="hero-bars"><i /><i /><i /><i /></span></div>
                 <span className="corner-mark corner-one" /><span className="corner-mark corner-two" />
               </section>}
@@ -575,9 +575,9 @@ function App() {
           {activeTab === 'Messages' && <MessagesPage handle={score.handle} selected={selectedDm} messages={appData.messages} onSelect={setSelectedDm} onSend={sendDm} />}
           {activeTab === 'Clipping' && <ClippingPage clips={appData.clips} onCreate={() => setModal({ type: 'clip-maker' })} onDelete={deleteClip} onShare={shareClip} />}
           {activeTab === 'Monthly Vote' && <VotePage month={month} votes={votes} voteCounts={voteCounts} onVote={castVote} />}
-          {(activeTab === 'Profile' || activeTab === 'Trophies') && <ProfilePage score={score} waitlistEmail={appData.waitlistEmail} currentTier={currentTier} nextTier={nextTier} progress={progress} unlocked={unlocked} onTrophies={() => goTo('Trophies')} onLinkSwish={linkSwish} onEditProfile={() => setModal({ type: 'edit-profile' })} onWaitlist={() => setModal({ type: 'waitlist' })} allTrophies={showAllTrophies || activeTab === 'Trophies'} />}
+          {(activeTab === 'Profile' || activeTab === 'Trophies') && <ProfilePage score={score} waitlistEmail={appData.waitlistEmail} currentTier={currentTier} nextTier={nextTier} progress={progress} unlocked={unlocked} onTrophies={() => goTo('Trophies')} onActivateCreatorNetwork={activateCreatorNetwork} onEditProfile={() => setModal({ type: 'edit-profile' })} onWaitlist={() => setModal({ type: 'waitlist' })} allTrophies={showAllTrophies || activeTab === 'Trophies'} />}
 
-          <footer className="site-footer"><span>GLITCH TV <i>© 2026</i></span><span>INDEPENDENT STORIES. UNFILTERED SIGNAL.</span><span className="footer-online"><span className="status-dot" /> ALL SYSTEMS NOMINAL</span></footer>
+          <footer className="site-footer"><span>YUGAMI <i>© 2026</i></span><span>INDEPENDENT STORIES. OPEN STREAM NETWORK.</span><span className="footer-online">KUROGAMI / GAMI BOYZ</span></footer>
         </main>
       </div>
 
@@ -617,7 +617,7 @@ function Leaderboard({ score, onOpen }) {
   return <section className="leaderboard-strip"><div className="leaderboard-icon"><Trophy size={17} /></div><div className="leaderboard-copy"><span className="eyebrow">MONTHLY OPERATOR BOARD</span><strong>Climb the signal.</strong><span>Top 15 creators split the monthly prize pool.</span></div><div className="leaderboard-score"><span>YOUR GS</span><strong>{score.gamerScore.toLocaleString()}</strong></div><button className="text-link" onClick={onOpen}>CAST A VOTE <ChevronRight size={15} /></button></section>;
 }
 
-function ProfilePage({ score, waitlistEmail, currentTier, nextTier, progress, unlocked, onTrophies, onLinkSwish, onEditProfile, onWaitlist, allTrophies }) {
+function ProfilePage({ score, waitlistEmail, currentTier, nextTier, progress, unlocked, onTrophies, onActivateCreatorNetwork, onEditProfile, onWaitlist, allTrophies }) {
   const recent = [...score.achievements].reverse().slice(0, 3).map((item) => achievements.find((achievement) => achievement.id === item.achievementId)).filter(Boolean);
   return <div className="profile-page">
     {!allTrophies && <>
@@ -633,7 +633,7 @@ function ProfilePage({ score, waitlistEmail, currentTier, nextTier, progress, un
         {recent.length ? <div className="recent-trophies">{recent.map((item) => <TrophyCard key={item.id} item={item} unlocked />)}</div> : <div className="empty-trophies"><span className="empty-trophy-icon"><Trophy size={20} /></span><div><strong>No trophies on the board yet.</strong><span>Watch a title, finish a chapter, or cast a monthly vote to earn your first GS.</span></div><span className="empty-zero">0 / {achievements.length}</span></div>}
       </section>
 
-      <section className="bridge-grid"><div className="bridge-card swish-card"><div className="bridge-top"><span className="swish-mark">S</span><span className="eyebrow">CROSS-SIGNAL BRIDGE</span><span className={`link-status ${score.linkedSwish ? 'linked' : ''}`}><i /> {score.linkedSwish ? 'LINKED' : 'NOT LINKED'}</span></div><h3>SWISH <span>·</span> Street Tactics</h3><p>Wins and reads will feed Operator score.</p><button className="button button-outline" onClick={() => { onLinkSwish(); window.open('https://swish-orpin-eight.vercel.app/', '_blank', 'noopener,noreferrer'); }}><Gamepad2 size={15} /> OPEN SWISH <ArrowUpRight size={13} /></button><span className="bridge-orbit">S</span></div>
+      <section className="bridge-grid"><div className="bridge-card creator-network-card"><div className="bridge-top"><span className="creator-network-mark">Y</span><span className="eyebrow">YUGAMI CREATOR NETWORK</span><span className={`link-status ${score.creatorNetworkEnabled ? 'linked' : ''}`}><i /> {score.creatorNetworkEnabled ? 'ACTIVE' : 'READY'}</span></div><h3>Creator network <span>·</span> Gami Boyz</h3><p>Keep creator drops and community stories connected on YUGAMI.</p><button className="button button-outline" onClick={onActivateCreatorNetwork}><Users size={15} /> {score.creatorNetworkEnabled ? 'NETWORK ACTIVE' : 'ACTIVATE NETWORK'} <ArrowUpRight size={13} /></button><span className="bridge-orbit">Y</span></div>
         <div className="bridge-card store-card"><span className="eyebrow">COMING ONLINE</span><div className="store-glyph"><Disc3 size={22} /><span>DROP_01</span></div><h3>Creator drops.</h3><p>Merch tied to the titles you love. The first drop is in the works.</p><button className="button button-outline" onClick={onWaitlist}>{waitlistEmail ? <><Check size={14} /> ON THE WAITLIST</> : <><Plus size={14} /> JOIN THE WAITLIST</>}</button><span className="store-stripe" /></div></section>
     </>}
     {allTrophies && <section className="trophies-page"><div className="trophy-total"><div><span className="eyebrow">ACHIEVEMENT ARCHIVE</span><h2>Every signal leaves a trace.</h2></div><div><strong>{score.achievements.length}<i> / {achievements.length}</i></strong><span>UNLOCKED</span></div></div><div className="trophy-grid">{achievements.map((item) => <TrophyCard key={item.id} item={item} unlocked={unlocked.has(item.id)} />)}</div><div className="trophy-footnote"><LockKeyhole size={13} /> {achievements.filter((item) => item.comingSoon).length} achievements tied to features coming online.</div></section>}
@@ -701,7 +701,7 @@ function EmptyState({ title, detail }) {
 }
 
 function Modal({ children, onClose }) {
-  return <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}><section className="modal-shell" role="dialog" aria-modal="true" aria-label="GLITCH TV dialog"><button className="modal-close icon-button" onClick={onClose} aria-label="Close dialog"><X size={17} /></button>{children}</section></div>;
+  return <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}><section className="modal-shell" role="dialog" aria-modal="true" aria-label="YUGAMI dialog"><button className="modal-close icon-button" onClick={onClose} aria-label="Close dialog"><X size={17} /></button>{children}</section></div>;
 }
 
 function MediaExperience({ item, mode, progress = 0, readProgress = 1, onReadProgress, completed = false, onProgress, onComplete }) {
@@ -720,7 +720,7 @@ function MediaExperience({ item, mode, progress = 0, readProgress = 1, onReadPro
   ];
   return <div className={`media-experience ${isRead ? 'reader-experience' : ''}`}><span className="eyebrow">{isRead ? 'READING MODE / CHAPTER 01' : 'PLAYBACK MODE / DEMO TITLE'}</span><h2>{item.title}</h2><p className="media-byline">{item.type} <i>·</i> {item.creator}</p>
     {isRead ? <div className="reader-content"><span className="reader-page-count">PAGE {String(page).padStart(2, '0')} / 03</span><p>{pages[page - 1]}</p><div className="reader-controls"><button className="button button-outline" disabled={page === 1} onClick={() => changePage(page - 1)}>PREVIOUS</button><button className="button button-outline" disabled={page === pages.length} onClick={() => changePage(page + 1)}>NEXT PAGE <ChevronRight size={13} /></button></div></div>
-      : <div className="playback-preview" style={{ backgroundImage: `linear-gradient(0deg, #08080ed9, #09091016), url(https://images.unsplash.com/${item.image}?auto=format&fit=crop&w=1100&q=80)` }}><span className="playback-label"><Radio size={14} /> GLITCH ORIGINAL / PREVIEW</span><span className="playback-title">{item.title}</span></div>}
+      : <div className="playback-preview" style={{ backgroundImage: `linear-gradient(0deg, #08080ed9, #09091016), url(https://images.unsplash.com/${item.image}?auto=format&fit=crop&w=1100&q=80)` }}><span className="playback-label"><Radio size={14} /> YUGAMI ORIGINAL / PREVIEW</span><span className="playback-title">{item.title}</span></div>}
     {!isRead && <div className="playback-progress"><div className="tier-progress-label"><span>PLAYBACK POSITION</span><span>{progress}%</span></div><input aria-label="Playback position" type="range" min="0" max="100" step="5" value={progress} onChange={(event) => onProgress(Number(event.target.value))} /></div>}
     <div className="experience-footer"><span>{isRead ? (completed ? 'CHAPTER PREVIOUSLY COMPLETED' : `PAGE ${page} OF ${pages.length}`) : 'DEMO CONTENT · PROGRESS SAVES LOCALLY'}</span><button className="button button-cyan" onClick={onComplete} disabled={isRead && completed}>{isRead ? completed ? <><Check size={14} /> COMPLETED</> : <><BookOpen size={14} /> MARK CHAPTER READ</> : <><Check size={14} /> COMPLETE TITLE</>}</button></div>
   </div>;
@@ -757,14 +757,14 @@ function NavigationMenu({ onNavigate }) {
 }
 
 function LoadingScreen() {
-  return <div className="boot-screen" role="status" aria-label="Loading GLITCH TV"><div className="boot-brand"><Disc3 size={34} /><span>GLITCH<span>TV</span></span></div><div className="boot-signal"><i /></div><div className="boot-caption"><span>ESTABLISHING SIGNAL</span><span>GLITCH NETWORK / 01</span></div></div>;
+  return <div className="boot-screen" role="status" aria-label="Loading YUGAMI"><div className="boot-brand"><Disc3 size={34} /><span>YUGAMI</span></div><div className="boot-signal"><i /></div><div className="boot-caption"><span>ESTABLISHING SIGNAL</span><span>YUGAMI NETWORK / 01</span></div></div>;
 }
 
 const guideSlides = [
-  { eyebrow: 'WELCOME TO THE UNDERGROUND', title: <>Stories break<br />through here.</>, body: 'GLITCH is an independent story network for comics, short films, and original series from creators working outside the usual channels.', image: 'photo-1519608487953-e999c86e7455', label: 'INDEPENDENT STORIES · ONE SIGNAL' },
+  { eyebrow: 'WELCOME TO YUGAMI', title: <>Stories break<br />through here.</>, body: 'YUGAMI is a home base for independent creators: shorts, videos, and comics. Live distribution can stay on channels like TikTok; YUGAMI keeps the stories, community, and drops together.', image: 'photo-1519608487953-e999c86e7455', label: 'OPEN STREAM NETWORK' },
   { eyebrow: '01 / DISCOVER', title: <>Find your next<br />rabbit hole.</>, body: 'Explore the watch and read catalog, follow what is trending, pick up where you stopped, and discover new voices by genre.', image: 'photo-1535223289827-42f1e9919769', label: 'WATCH · READ · FOLLOW' },
   { eyebrow: '02 / MAKE & SHARE', title: <>Make noise.<br />Bring people in.</>, body: 'Post a signal, follow creator updates, and host a watch or read party with the community.', image: 'photo-1516280440614-37939bbacd81', label: 'SOCIAL · PARTIES' },
-  { eyebrow: '03 / SUPPORT CREATORS', title: <>Your attention<br />has a signal.</>, body: 'Vote for monthly favorites, earn Gamer Score, and shop creator-linked drops. Future sponsor-funded programs could send more value back to the creators.', image: 'photo-1513364776144-60967b0f800f', label: 'VOTE · EARN · SHOP' },
+  { eyebrow: '03 / SUPPORT CREATORS', title: <>Your attention<br />has a signal.</>, body: 'Vote for monthly favorites, earn Gamer Score, and discover creator-linked drops from the YUGAMI network.', image: 'photo-1513364776144-60967b0f800f', label: 'VOTE · EARN · SHOP' },
 ];
 
 function WelcomeGuide({ onClose }) {
@@ -784,9 +784,9 @@ function WelcomeGuide({ onClose }) {
     touchStart.current = null;
   };
   return <div className="guide-backdrop" onKeyDown={handleKeyDown} onTouchStart={(event) => { touchStart.current = event.touches[0].clientX; }} onTouchEnd={handleTouchEnd}>
-    <section className="guide-panel" aria-label="GLITCH TV getting started guide">
+    <section className="guide-panel" aria-label="YUGAMI getting started guide">
       <div className="guide-visual" style={{ backgroundImage: `linear-gradient(0deg, #09070fc9, #09070f13 80%), url(https://images.unsplash.com/${slide.image}?auto=format&fit=crop&w=1300&q=85)` }}><span className="guide-visual-label">{slide.label}</span><span className="guide-orbit">G</span></div>
-      <div className="guide-content"><div className="guide-topline"><span className="eyebrow">{slide.eyebrow}</span><button className="guide-close" onClick={onClose}>SKIP <X size={14} /></button></div><div className="guide-copy" key={index}><h2>{slide.title}</h2><p>{slide.body}</p></div><div className="guide-footer"><div className="guide-pagination"><span>{String(index + 1).padStart(2, '0')}</span><div>{guideSlides.map((item, slideIndex) => <button key={item.eyebrow} className={slideIndex === index ? 'active' : ''} onClick={() => setIndex(slideIndex)} aria-label={`Go to guide page ${slideIndex + 1}`} />)}</div><span>{String(guideSlides.length).padStart(2, '0')}</span></div><div className="guide-controls">{index > 0 && <button className="guide-arrow guide-back" onClick={previous} aria-label="Previous guide page"><ChevronLeft size={19} /></button>}<button className="button button-cyan guide-next" onClick={next}>{index === guideSlides.length - 1 ? 'ENTER GLITCH' : 'NEXT'} {index === guideSlides.length - 1 ? <ArrowRight size={15} /> : <ChevronRight size={15} />}</button></div></div></div>
+      <div className="guide-content"><div className="guide-topline"><span className="eyebrow">{slide.eyebrow}</span><button className="guide-close" onClick={onClose}>SKIP <X size={14} /></button></div><div className="guide-copy" key={index}><h2>{slide.title}</h2><p>{slide.body}</p></div><div className="guide-footer"><div className="guide-pagination"><span>{String(index + 1).padStart(2, '0')}</span><div>{guideSlides.map((item, slideIndex) => <button key={item.eyebrow} className={slideIndex === index ? 'active' : ''} onClick={() => setIndex(slideIndex)} aria-label={`Go to guide page ${slideIndex + 1}`} />)}</div><span>{String(guideSlides.length).padStart(2, '0')}</span></div><div className="guide-controls">{index > 0 && <button className="guide-arrow guide-back" onClick={previous} aria-label="Previous guide page"><ChevronLeft size={19} /></button>}<button className="button button-cyan guide-next" onClick={next}>{index === guideSlides.length - 1 ? 'ENTER YUGAMI' : 'NEXT'} {index === guideSlides.length - 1 ? <ArrowRight size={15} /> : <ChevronRight size={15} />}</button></div></div></div>
     </section>
   </div>;
 }
@@ -797,9 +797,9 @@ function MarketplacePage({ products, cart, orders, onAdd, onSell, onOpenCart }) 
   const visibleProducts = products.filter((item) => category === 'ALL DROPS'
     || (category === 'CREATOR' ? item.creatorSubmitted : item.category === category));
   const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
-  return <div className="marketplace-page"><section className="market-hero"><div><span className="eyebrow">GLITCH MARKET / CREATOR-LED GOODS</span><h2>Keep a piece<br />of the <em>signal.</em></h2><p>Limited drops connected to the stories and creators you follow.</p><button className="button button-cyan sell-drop-button" onClick={onSell}><Plus size={14} /> POST A DROP</button></div><div className="market-bag"><ShoppingBag size={26} /><span>DROP_01 / NO CHECKOUT GATE</span></div></section>
+  return <div className="marketplace-page"><section className="market-hero"><div><span className="eyebrow">YUGAMI MARKET / CREATOR-LED GOODS</span><h2>Keep a piece<br />of the <em>signal.</em></h2><p>Limited drops connected to the stories and creators you follow.</p><button className="button button-cyan sell-drop-button" onClick={onSell}><Plus size={14} /> POST A DROP</button></div><div className="market-bag"><ShoppingBag size={26} /><span>DROP_01 / NO CHECKOUT GATE</span></div></section>
     <div className="market-toolbar"><div className="market-filters">{categories.map((item) => <button key={item} className={category === item ? 'selected' : ''} onClick={() => setCategory(item)}>{item}</button>)}</div><button className="button button-outline market-cart-button" onClick={onOpenCart}><ShoppingCart size={15} /> DROP BAG <span>{cartCount}</span></button></div>
-    <div className="market-grid">{visibleProducts.map((product, index) => { const quantity = cart.find((item) => item.productId === product.id)?.quantity ?? 0; const image = product.imageUrl || `https://images.unsplash.com/${product.image}?auto=format&fit=crop&w=900&q=80`; return <article className="product-card" key={product.id}><div className={`product-art product-art-${index % 4}`} style={{ backgroundImage: `linear-gradient(0deg, #08070bd0, #08070b08 62%), url("${image}")` }}><span>{product.category}</span><span className="product-edition">{product.creatorSubmitted ? 'CREATOR DROP' : `GLITCH DROP / 0${index + 1}`}</span></div><div className="product-info"><div><span className="eyebrow">BY {product.creator.toUpperCase()}</span><h3>{product.title}</h3><p>{product.description}</p></div><div className="product-purchase"><strong>${product.price}</strong><button className="button button-cyan" onClick={() => onAdd(product)}>{quantity ? <><Check size={13} /> IN BAG · {quantity}</> : <><Plus size={13} /> ADD TO BAG</>}</button></div></div></article>; })}{visibleProducts.length === 0 && <EmptyState title="No creator drops yet" detail="Post the first item from your creator account." />}</div>
+    <div className="market-grid">{visibleProducts.map((product, index) => { const quantity = cart.find((item) => item.productId === product.id)?.quantity ?? 0; const image = product.imageUrl || `https://images.unsplash.com/${product.image}?auto=format&fit=crop&w=900&q=80`; return <article className="product-card" key={product.id}><div className={`product-art product-art-${index % 4}`} style={{ backgroundImage: `linear-gradient(0deg, #08070bd0, #08070b08 62%), url("${image}")` }}><span>{product.category}</span><span className="product-edition">{product.creatorSubmitted ? 'CREATOR DROP' : `YUGAMI DROP / 0${index + 1}`}</span></div><div className="product-info"><div><span className="eyebrow">BY {product.creator.toUpperCase()}</span><h3>{product.title}</h3><p>{product.description}</p></div><div className="product-purchase"><strong>${product.price}</strong><button className="button button-cyan" onClick={() => onAdd(product)}>{quantity ? <><Check size={13} /> IN BAG · {quantity}</> : <><Plus size={13} /> ADD TO BAG</>}</button></div></div></article>; })}{visibleProducts.length === 0 && <EmptyState title="No creator drops yet" detail="Post the first item from your creator account." />}</div>
     <section className="market-terms"><CircleDollarSign size={19} /><div><strong>Creator-linked by design.</strong><span>Each drop is presented with its creator. Orders and checkout are local demos; no payment is collected and nothing ships in this preview.</span></div><Sparkles size={15} /></section>
     {orders.length > 0 && <section className="market-orders"><span className="eyebrow">LOCAL DEMO RECEIPTS</span><h3>Your recent orders</h3>{orders.slice(0, 3).map((order) => <div key={order.id}><span>{order.id}</span><span>{order.items.reduce((sum, item) => sum + item.quantity, 0)} items</span><strong>${order.total.toFixed(2)}</strong></div>)}</section>}
   </div>;
@@ -808,7 +808,7 @@ function MarketplacePage({ products, cart, orders, onAdd, onSell, onOpenCart }) 
 function MarketCart({ products, cart, onQuantity, onCheckout, onClose }) {
   const lines = cart.map((line) => ({ ...line, product: products.find((product) => product.id === line.productId) })).filter((line) => line.product);
   const total = lines.reduce((sum, line) => sum + line.product.price * line.quantity, 0);
-  return <div className="market-cart-dialog"><span className="eyebrow">GLITCH MARKET / YOUR BAG</span><h2>Drop bag.</h2>{lines.length ? <div className="cart-lines">{lines.map((line) => <div className="cart-line" key={line.productId}><div className="cart-thumb" style={{ backgroundImage: `url(https://images.unsplash.com/${line.product.image}?auto=format&fit=crop&w=200&q=75)` }} /><div className="cart-description"><strong>{line.product.title}</strong><span>${line.product.price} · {line.product.creator}</span><div className="cart-quantity"><button onClick={() => onQuantity(line.productId, line.quantity - 1)} aria-label="Decrease quantity"><Minus size={12} /></button><span>{line.quantity}</span><button onClick={() => onQuantity(line.productId, line.quantity + 1)} aria-label="Increase quantity"><Plus size={12} /></button></div></div><strong className="cart-line-total">${(line.product.price * line.quantity).toFixed(2)}</strong></div>)}</div> : <div className="cart-empty"><ShoppingBag size={22} /><strong>Your drop bag is empty.</strong><span>Explore the latest creator drops.</span></div>}
+  return <div className="market-cart-dialog"><span className="eyebrow">YUGAMI MARKET / YOUR BAG</span><h2>Drop bag.</h2>{lines.length ? <div className="cart-lines">{lines.map((line) => <div className="cart-line" key={line.productId}><div className="cart-thumb" style={{ backgroundImage: `url(https://images.unsplash.com/${line.product.image}?auto=format&fit=crop&w=200&q=75)` }} /><div className="cart-description"><strong>{line.product.title}</strong><span>${line.product.price} · {line.product.creator}</span><div className="cart-quantity"><button onClick={() => onQuantity(line.productId, line.quantity - 1)} aria-label="Decrease quantity"><Minus size={12} /></button><span>{line.quantity}</span><button onClick={() => onQuantity(line.productId, line.quantity + 1)} aria-label="Increase quantity"><Plus size={12} /></button></div></div><strong className="cart-line-total">${(line.product.price * line.quantity).toFixed(2)}</strong></div>)}</div> : <div className="cart-empty"><ShoppingBag size={22} /><strong>Your drop bag is empty.</strong><span>Explore the latest creator drops.</span></div>}
     <div className="cart-total"><span>DEMO ORDER TOTAL</span><strong>${total.toFixed(2)}</strong></div><p className="cart-disclaimer">Preview only. No payment details are requested and no order will be fulfilled.</p><div className="form-actions"><button className="button button-outline" onClick={onClose}>KEEP BROWSING</button><button className="button button-cyan" onClick={onCheckout} disabled={!lines.length}><Check size={14} /> PLACE DEMO ORDER</button></div></div>;
 }
 
@@ -831,7 +831,7 @@ const dmContacts = [
 function MessagesPage({ handle, selected, messages, onSelect, onSend }) {
   const [draft, setDraft] = useState('');
   const thread = messages.filter((message) => (message.from === handle && message.to === selected) || (message.from === selected && message.to === handle));
-  const contact = dmContacts.find((item) => item.handle === selected) ?? { handle: selected, name: selected, note: 'GLITCH operator' };
+  const contact = dmContacts.find((item) => item.handle === selected) ?? { handle: selected, name: selected, note: 'YUGAMI operator' };
   const submit = (event) => {
     event.preventDefault();
     if (!draft.trim()) return;
@@ -846,10 +846,10 @@ function OrderConfirmation({ order, onDone }) {
 }
 
 function ClippingPage({ clips, onCreate, onDelete, onShare }) {
-  return <div className="clipping-page"><section className="clip-hero"><div><span className="eyebrow">GLITCH CLIPS / CREATOR ECONOMY</span><h2>Make the moment<br /><em>travel.</em></h2><p>Find a scene worth sharing. Set the in and out points. Give the story a second life in the feed.</p><button className="button button-cyan" onClick={onCreate}><Scissors size={15} /> CREATE A CLIP</button></div><div className="clip-frame"><img src="https://images.unsplash.com/photo-1535223289827-42f1e9919769?auto=format&fit=crop&w=750&q=85" alt="Abstract signal lights used as a demo clipping frame" /><span className="clip-frame-label"><Radio size={13} /> CLIP PREVIEW</span><span className="clip-timeline"><i /><i /><i /></span></div></section>
-    <section className="clip-how"><div className="section-head"><div><span className="eyebrow">THREE STEPS TO A SIGNAL BOOST</span><h2>How clipping works</h2></div><span className="clip-beta">BETA / LOCAL DEMO</span></div><div className="clip-steps"><article><span>01</span><Scissors size={18} /><h3>Pick a title</h3><p>Choose a GLITCH story and find the scene you want people to discover.</p></article><article><span>02</span><Clock3 size={18} /><h3>Mark the moment</h3><p>Set in and out points for a short excerpt. Keep it focused and credit the source.</p></article><article><span>03</span><Share2 size={18} /><h3>Publish & track</h3><p>Share a clip card that links back to the original. Future attribution can track views and watch-through.</p></article></div></section>
-    <section className="clip-economy"><div className="economy-heading"><span className="eyebrow">ILLUSTRATIVE MODEL / NOT LIVE PAYOUTS</span><h2>Good clips should<br />send value back.</h2><p>A future campaign pool could be funded by sponsors or platform revenue, then split among the people who made and moved the story.</p></div><div className="revenue-split"><div className="split-total"><span>EXAMPLE CAMPAIGN POOL</span><strong>$1,000</strong></div><div className="split-row"><span><i className="split-clipper" />CLIP CREATOR</span><strong>70%</strong></div><div className="split-meter"><i style={{ width: '70%' }} /></div><div className="split-row"><span><i className="split-rights" />ORIGINAL CREATOR / RIGHTS</span><strong>20%</strong></div><div className="split-meter"><i className="rights-meter" style={{ width: '20%' }} /></div><div className="split-row"><span><i className="split-platform" />PLATFORM OPERATIONS</span><strong>10%</strong></div><div className="split-meter"><i className="platform-meter" style={{ width: '10%' }} /></div><small>Example split only. Real rates, rights permissions, and payouts would require contracts and a backend.</small></div></section>
-    <section className="clip-library"><div className="section-head"><div><span className="eyebrow">YOUR CLIPBOARD</span><h2>Published clips <span className="clip-count">{clips.length.toString().padStart(2, '0')}</span></h2></div></div>{clips.length ? <div className="clip-list">{clips.map((clip) => { const title = titles.find((item) => item.id === clip.titleId); return <article id={clip.id} className="clip-item" key={clip.id}><div className="clip-item-art" style={{ backgroundImage: `url(https://images.unsplash.com/${title?.image ?? titles[0].image}?auto=format&fit=crop&w=420&q=75)` }}><span>{Math.floor(clip.start / 60).toString().padStart(2, '0')}:{(clip.start % 60).toString().padStart(2, '0')} — {Math.floor(clip.end / 60).toString().padStart(2, '0')}:{(clip.end % 60).toString().padStart(2, '0')}</span></div><div className="clip-item-copy"><span className="eyebrow">{clip.status} · {new Date(clip.createdAt).toLocaleDateString()}</span><h3>{title?.title ?? 'GLITCH TITLE'}</h3><span>CLIP / {clip.id.slice(-7).toUpperCase()}</span></div><button className="icon-button" onClick={() => onShare(clip.id)} aria-label="Share clip"><Share2 size={15} /></button><button className="icon-button" onClick={() => onDelete(clip.id)} aria-label="Delete clip"><Trash2 size={15} /></button></article>; })}</div> : <div className="clip-empty"><Scissors size={21} /><div><strong>No clips yet.</strong><span>Make your first clip card from a title in the catalog.</span></div><button className="text-link" onClick={onCreate}>CREATE CLIP <ArrowRight size={14} /></button></div>}</section>
+  return <div className="clipping-page"><section className="clip-hero"><div><span className="eyebrow">YUGAMI CLIPS / CREATOR ECONOMY</span><h2>Make the moment<br /><em>travel.</em></h2><p>Find a scene worth sharing. Set the in and out points. Give the story a second life in the feed.</p><button className="button button-cyan" onClick={onCreate}><Scissors size={15} /> CREATE A CLIP</button></div><div className="clip-frame"><img src="https://images.unsplash.com/photo-1535223289827-42f1e9919769?auto=format&fit=crop&w=750&q=85" alt="Abstract signal lights used as a demo clipping frame" /><span className="clip-frame-label"><Radio size={13} /> CLIP PREVIEW</span><span className="clip-timeline"><i /><i /><i /></span></div></section>
+    <section className="clip-how"><div className="section-head"><div><span className="eyebrow">THREE STEPS TO A SIGNAL BOOST</span><h2>How clipping works</h2></div><span className="clip-beta">BETA / LOCAL DEMO</span></div><div className="clip-steps"><article><span>01</span><Scissors size={18} /><h3>Pick a title</h3><p>Choose a YUGAMI story and find the scene you want people to discover.</p></article><article><span>02</span><Clock3 size={18} /><h3>Mark the moment</h3><p>Set in and out points for a short excerpt. Keep it focused and credit the source.</p></article><article><span>03</span><Share2 size={18} /><h3>Publish & track</h3><p>Share a clip card that links back to the original. Future attribution can track views and watch-through.</p></article></div></section>
+    <section className="clip-economy"><div className="economy-heading"><span className="eyebrow">ILLUSTRATIVE MODEL / NOT LIVE PAYOUTS</span><h2>Good clips should<br />send value back.</h2><p>A future YUGAMI creator pool could share value among clip makers and original rights holders.</p></div><div className="revenue-split"><div className="split-total"><span>EXAMPLE CREATOR POOL</span><strong>$1,000</strong></div><div className="split-row"><span><i className="split-clipper" />CLIP CREATOR</span><strong>70%</strong></div><div className="split-meter"><i style={{ width: '70%' }} /></div><div className="split-row"><span><i className="split-rights" />ORIGINAL CREATOR / RIGHTS</span><strong>20%</strong></div><div className="split-meter"><i className="rights-meter" style={{ width: '20%' }} /></div><div className="split-row"><span><i className="split-platform" />YUGAMI OPERATIONS</span><strong>10%</strong></div><div className="split-meter"><i className="platform-meter" style={{ width: '10%' }} /></div><small>Illustrative only. Clips currently save time markers and share cards; no payouts are connected.</small></div></section>
+    <section className="clip-library"><div className="section-head"><div><span className="eyebrow">YOUR CLIPBOARD</span><h2>Published clips <span className="clip-count">{clips.length.toString().padStart(2, '0')}</span></h2></div></div>{clips.length ? <div className="clip-list">{clips.map((clip) => { const title = titles.find((item) => item.id === clip.titleId); return <article id={clip.id} className="clip-item" key={clip.id}><div className="clip-item-art" style={{ backgroundImage: `url(https://images.unsplash.com/${title?.image ?? titles[0].image}?auto=format&fit=crop&w=420&q=75)` }}><span>{Math.floor(clip.start / 60).toString().padStart(2, '0')}:{(clip.start % 60).toString().padStart(2, '0')} — {Math.floor(clip.end / 60).toString().padStart(2, '0')}:{(clip.end % 60).toString().padStart(2, '0')}</span></div><div className="clip-item-copy"><span className="eyebrow">{clip.status} · {new Date(clip.createdAt).toLocaleDateString()}</span><h3>{title?.title ?? 'YUGAMI TITLE'}</h3><span>CLIP / {clip.id.slice(-7).toUpperCase()}</span></div><button className="icon-button" onClick={() => onShare(clip.id)} aria-label="Share clip"><Share2 size={15} /></button><button className="icon-button" onClick={() => onDelete(clip.id)} aria-label="Delete clip"><Trash2 size={15} /></button></article>; })}</div> : <div className="clip-empty"><Scissors size={21} /><div><strong>No clips yet.</strong><span>Make your first clip card from a title in the catalog.</span></div><button className="text-link" onClick={onCreate}>CREATE CLIP <ArrowRight size={14} /></button></div>}</section>
     <p className="clip-limit-note"><Info size={13} /> Current clips save time markers and a share card only. Source media, rendering, rights verification, and payouts are not connected in this MVP.</p>
   </div>;
 }
