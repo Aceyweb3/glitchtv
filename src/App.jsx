@@ -103,6 +103,29 @@ const navItems = [
 ];
 
 const ARCADE_URL = 'https://kurogami-arcade.vercel.app';
+const WORLD_URL = 'https://kurogami-v1.vercel.app/#top';
+
+const publicNavLinks = [
+  { label: 'Home', href: '#top' },
+  { label: 'Art', href: '#artists' },
+  { label: 'Shop', href: '#shop' },
+  { label: 'Sound', href: '#sound' },
+  { label: 'Podcast', href: '#podcast' },
+  { label: 'Arcade', href: ARCADE_URL, external: true },
+  { label: 'World', href: WORLD_URL, external: true },
+  { label: 'Desk', href: '#desk' },
+];
+
+const publicDoors = [
+  { title: 'Art', description: 'Originals and drops from resident artists.', href: '#artists', action: 'Explore art', icon: Sparkles },
+  { title: 'Sound', description: 'Music and visual drops, with Tom as the spearhead.', href: '#sound', action: 'Discover sound', icon: Disc3 },
+  { title: 'Podcast', description: 'Culture, builders, and markets.', href: '#podcast', action: 'Meet Yugami Radio', icon: Headphones },
+  { title: 'Shop', description: 'Art, merch, and limited drops.', href: '#shop', action: 'Shop the drops', icon: ShoppingBag },
+  { title: 'Arcade', description: 'Ten cabinets. Nine train attention; cabinet 10 is Fracture Arena — Codex, chamber, and path toward the desk.', href: ARCADE_URL, action: 'Enter Arcade', icon: Trophy, external: true, featured: true },
+  { title: 'World', description: 'Shadow Brickell: Fracture Dojo, districts, Nur Codex, factions. Where the key opens the map.', href: WORLD_URL, action: 'Enter World', icon: Compass, external: true, featured: true },
+  { title: 'Desk', description: 'Operator track: process, structure, real desk path.', href: '#desk', action: 'Enter the desk', icon: Shield },
+  { title: 'Network', description: 'Members, events, and introductions.', href: '#network', action: 'Find your people', icon: Users },
+];
 
 function getTier(score) {
   return [...tiers].reverse().find((tier) => score >= tier.min) ?? tiers[0];
@@ -620,15 +643,6 @@ function App() {
 }
 
 function YugamiLanding({ onEnter, onApply }) {
-  const doors = [
-    { title: 'Art', description: 'Originals and drops from resident artists. Collect and support the people building this world.', href: '#artists', action: 'Explore art', icon: Sparkles },
-    { title: 'Sound', description: 'AI music and visual drops led by Tom. The sonic identity of Yugami.', href: '#sound', action: 'Hear the signal', icon: Disc3 },
-    { title: 'Podcast', description: 'Conversations on culture, markets, and builders. Launch rail with Scholar.', href: '#podcast', action: 'Meet Yugami Radio', icon: Headphones },
-    { title: 'Shop', description: 'Art, merch, and limited drops. Physical and digital.', href: '#shop', action: 'Shop the drops', icon: ShoppingBag },
-    { title: 'Arcade', description: 'Kurogami Arcade: ten cabinets. Nine train attention. The tenth is Fracture Arena — build a Codex, enter the chamber, earn the desk.', href: ARCADE_URL, action: 'Enter Arcade', icon: Trophy, external: true },
-    { title: 'Desk', description: 'Process, curriculum, and trading structure for people who execute.', href: '#desk', action: 'Enter the desk', icon: Shield },
-    { title: 'Network', description: 'Members, events, and introductions. The social layer that keeps the system alive.', href: '#network', action: 'Find your people', icon: Users },
-  ];
   const artists = [
     { name: 'Lens', role: 'Resident artist', image: 'photo-1579783902614-a3fb3927b6a5', description: 'Original work and visual worlds.' },
     { name: 'Jay', role: 'Resident artist', image: 'photo-1541961017774-22349e4a1262', description: 'Art, objects, and limited editions.' },
@@ -644,9 +658,9 @@ function YugamiLanding({ onEnter, onApply }) {
     <header className="public-nav">
       <a className="public-wordmark" href="#top" aria-label="Yugami home"><Disc3 size={20} /> YUGAMI</a>
       <nav aria-label="Main navigation">
-        {[['Home', '#top'], ['Art', '#artists'], ['Shop', '#shop'], ['Sound', '#sound'], ['Podcast', '#podcast'], ['Arcade', ARCADE_URL], ['Desk', '#desk']].map(([label, href]) => <a href={href} key={label} target={href === ARCADE_URL ? '_blank' : undefined} rel={href === ARCADE_URL ? 'noreferrer' : undefined}>{label}</a>)}
+        {publicNavLinks.map(({ label, href, external }) => <a href={href} key={label} target={external ? '_blank' : undefined} rel={external ? 'noreferrer' : undefined}>{label}</a>)}
       </nav>
-      <button className="public-enter" onClick={onEnter}>Enter Yugami <ArrowUpRight size={14} /></button>
+      <button className="public-enter" onClick={onEnter}>Enter <ArrowUpRight size={14} /></button>
     </header>
 
     <main>
@@ -655,11 +669,12 @@ function YugamiLanding({ onEnter, onApply }) {
         <div className="public-hero-content">
           <span className="public-eyebrow">A CULTURE PLATFORM / MIAMI + BEYOND</span>
           <h1>YUGAMI</h1>
-          <p className="public-positioning">The home for the artists, the sound, the desk, the arcade, and the people building in public.</p>
-          <p className="public-hero-detail">Art on the walls. Music in the feed. Merch in the store. Podcast on the mic.<br />Arcade for attention and the chamber. Desk for operators.</p>
+          <p className="public-positioning">The house for the artists, the sound, the desk, the arcade, and the world.</p>
+          <p className="public-hero-detail">Art and merch up front. Arcade for attention and the chamber. World for Shadow Brickell and the Nur Codex. Desk for operators.</p>
           <div className="public-actions">
             <button className="public-button public-button-gold" onClick={onEnter}>Enter Yugami <ArrowUpRight size={15} /></button>
             <a className="public-button public-button-outline" href="#shop">Shop <ArrowUpRight size={15} /></a>
+            <a className="public-button public-button-quiet" href={WORLD_URL} target="_blank" rel="noreferrer">Enter World <ArrowUpRight size={15} /></a>
             <a className="public-button public-button-quiet" href={ARCADE_URL} target="_blank" rel="noreferrer">Enter Arcade <ArrowUpRight size={15} /></a>
           </div>
           <span className="public-hero-index">ART / SOUND / PEOPLE / PLAY</span>
@@ -668,12 +683,12 @@ function YugamiLanding({ onEnter, onApply }) {
 
       <section className="public-section public-intro" id="about">
         <div className="public-section-heading"><span className="public-eyebrow">01 / WHAT IS YUGAMI</span><h2>One home.<br /><em>Many doors.</em></h2></div>
-        <p>Yugami is the single public home for culture, creation, play, and operation. Not a linktree. Coordinated doors into one world. Deeper infrastructure — the desk and chamber path — sits under the Arcade and Desk doors.</p>
+        <p>Yugami is the house. Each door opens into one world: culture, art, sound, play, place, or the operator desk.</p>
       </section>
 
       <section className="public-section" id="doors">
         <div className="public-section-title"><span className="public-eyebrow">02 / FIND YOUR WAY IN</span><h2>Choose a door.</h2></div>
-        <div className="door-grid">{doors.map(({ title, description, href, action, icon: Icon, external }, index) => <a className="door-card" href={href} key={title} target={external ? '_blank' : undefined} rel={external ? 'noreferrer' : undefined}>
+        <div className="door-grid">{publicDoors.map(({ title, description, href, action, icon: Icon, external, featured }, index) => <a className={`door-card${featured ? ' door-card-featured' : ''}`} href={href} key={title} target={external ? '_blank' : undefined} rel={external ? 'noreferrer' : undefined}>
           <span className="door-number">0{index + 1}</span><Icon size={20} /><h3>{title}</h3><p>{description}</p><span className="door-link">{action} <ArrowUpRight size={13} /></span>
         </a>)}</div>
       </section>
@@ -714,23 +729,28 @@ function YugamiLanding({ onEnter, onApply }) {
 
       <section className="public-section public-games" id="arcade">
         <div className="public-games-image"><img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200&q=80" alt="" loading="lazy" /><span className="public-eyebrow">KUROGAMI ARCADE / CABINETS 01—10</span></div>
-        <div><span className="public-eyebrow">07 / PLAY INSIDE THE WORLD</span><h2>Arcade.</h2><h3>Kurogami Arcade</h3><p>A dojo of attention built as an arcade. Nine short cabinets train space, form, timing, order, patience, repair, and restraint.<br />The tenth cabinet is Fracture Arena — contested play, Codex and Forge, path to the desk.</p><a className="public-button public-button-gold" href={ARCADE_URL} target="_blank" rel="noreferrer">Enter Arcade <ArrowUpRight size={14} /></a><span className="public-arcade-note">Fracture Arena is cabinet 10 inside the Arcade.</span></div>
+        <div><span className="public-eyebrow">07 / THE GAME FLOOR</span><h2>Arcade.</h2><h3>Kurogami Arcade</h3><p>Nine cabinets train space, form, timing, order, patience, repair, restraint. Cabinet 10 is Fracture Arena — contested play and the desk-access path.</p><a className="public-button public-button-gold" href={ARCADE_URL} target="_blank" rel="noreferrer">Enter Arcade <ArrowUpRight size={14} /></a></div>
+      </section>
+
+      <section className="public-section public-world" id="world">
+        <div className="public-world-image"><img src="https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1200&q=80" alt="" loading="lazy" /><span className="public-eyebrow">SHADOW BRICKELL / THE MAP</span></div>
+        <div><span className="public-eyebrow">08 / KUROGAMI WORLD</span><h2>Access the Fracture.</h2><p>Playable shadow metaverse over Brickell. Claim a Genesis crest, meet the Veil Keeper, walk the districts, open the Nur Codex.<br />The key is admission to the world — the same culture that bridges toward the live server later.</p><a className="public-button public-button-gold" href={WORLD_URL} target="_blank" rel="noreferrer">Enter World <ArrowUpRight size={14} /></a><span className="public-world-note">Crests are access passes in-world. Desk is a separate operator path.</span></div>
       </section>
 
       <section className="public-section public-desk" id="desk">
-        <div><span className="public-eyebrow">08 / FOR THE OPERATORS</span><h2>Process, not just entertainment.</h2></div>
+        <div><span className="public-eyebrow">09 / FOR THE OPERATORS</span><h2>Process, not just entertainment.</h2></div>
         <div><p>The desk is for people who want structure: a working process, a curriculum, and a place to execute. The deeper infrastructure sits underneath.</p><button className="public-button public-button-gold" onClick={onApply}>Join the operator waitlist <ArrowUpRight size={14} /></button></div>
       </section>
 
       <section className="public-section public-network" id="network">
-        <div><span className="public-eyebrow">09 / NETWORK + EVENTS</span><h2>Built together.<br /><em>In real life.</em></h2></div>
+        <div><span className="public-eyebrow">10 / NETWORK + EVENTS</span><h2>Built together.<br /><em>In real life.</em></h2></div>
         <div id="contact"><p>Nights, painting, music, and builders in Miami and beyond. The people are part of the platform.</p><button className="public-button public-button-outline" onClick={onApply}>Enter / Apply <ArrowUpRight size={14} /></button><span className="public-section-note">EVENTS / MIAMI + BEYOND</span></div>
       </section>
     </main>
 
     <footer className="public-footer">
-      <p>Yugami is the house. The Arcade is the game floor. The desk is for operators.</p>
-      <nav aria-label="Footer navigation"><a href="#shop">Shop</a><a href="#artists">Art</a><a href={ARCADE_URL} target="_blank" rel="noreferrer">Arcade</a><a href="#desk">Desk</a><button onClick={onEnter}>Enter</button></nav>
+      <p>Yugami is the house. Arcade is the game floor. World is the map. Desk is for operators.</p>
+      <nav aria-label="Footer navigation"><a href="#shop">Shop</a><a href="#artists">Art</a><a href={ARCADE_URL} target="_blank" rel="noreferrer">Arcade</a><a href={WORLD_URL} target="_blank" rel="noreferrer">World</a><a href="#desk">Desk</a><button onClick={onEnter}>Enter</button></nav>
       <span>YUGAMI / KUROGAMI</span>
     </footer>
   </>;

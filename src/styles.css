@@ -303,8 +303,8 @@ kbd { font: 9px var(--mono); border: 1px solid #30303a; padding: 2px 4px; color:
 .door-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid #302a2b; border-left: 1px solid #302a2b; }
 .door-card { position: relative; min-height: 220px; padding: 22px 19px; border-right: 1px solid #302a2b; border-bottom: 1px solid #302a2b; color: inherit; text-decoration: none; transition: background .2s, border-color .2s; }
 .door-card:hover { background: #d7b45f09; }
-.door-card[href^="https://kurogami-arcade"] { background: #d7b45f06; }
-.door-card[href^="https://kurogami-arcade"]:hover { background: #d7b45f12; }
+.door-card-featured { background: #d7b45f06; }
+.door-card-featured:hover { background: #d7b45f12; }
 .door-number { position: absolute; top: 20px; right: 18px; color: #665c45; font: 8px var(--mono); }
 .door-card > svg { color: #d7b45f; }
 .door-card h3 { margin: 24px 0 7px; color: #f3efe8; font-size: 17px; font-weight: 500; }
@@ -318,7 +318,7 @@ kbd { font: 9px var(--mono); border: 1px solid #30303a; padding: 2px 4px; color:
 .public-product-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 .public-product-card { min-width: 0; border: 1px solid #302a2b; background: #111012; }
 .public-product-image { position: relative; height: clamp(160px, 23vw, 280px); overflow: hidden; background: #181517; }
-.public-product-image img, .public-artist-card > img, .public-video-placeholder > img, .public-games-image > img { display: block; width: 100%; height: 100%; object-fit: cover; filter: saturate(.6) contrast(1.08); }
+.public-product-image img, .public-artist-card > img, .public-video-placeholder > img, .public-games-image > img, .public-world-image > img { display: block; width: 100%; height: 100%; object-fit: cover; filter: saturate(.6) contrast(1.08); }
 .public-product-image > span { position: absolute; top: 12px; left: 12px; padding: 5px 7px; color: #e7c96f; background: #0b0a0ccc; font: 7px var(--mono); letter-spacing: .7px; }
 .public-product-info { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px; }
 .public-product-info h3 { margin: 0 0 7px; color: #f3efe8; font-size: 11px; font-weight: 500; }
@@ -331,7 +331,7 @@ kbd { font: 9px var(--mono); border: 1px solid #30303a; padding: 2px 4px; color:
 .public-artist-card > div { padding: 16px; }
 .public-artist-card .public-eyebrow { font-size: 7px; }
 .public-artist-card h3 { margin: 8px 0 5px; color: #f3efe8; font-size: 19px; font-weight: 500; }
-.public-artist-card p, .public-podcast p, .public-games > div > p, .public-desk p, .public-network p { margin: 0; color: #aaa2a2; font-size: 11px; line-height: 1.8; }
+.public-artist-card p, .public-podcast p, .public-games > div > p, .public-world > div > p, .public-desk p, .public-network p { margin: 0; color: #aaa2a2; font-size: 11px; line-height: 1.8; }
 .public-artist-card a { display: inline-flex; align-items: center; gap: 5px; margin-top: 15px; color: #d7b45f; text-decoration: none; font: 8px var(--mono); }
 .public-feature { border-top: 1px solid #302a2b; }
 .public-feature .public-section-copy { margin-top: -12px; margin-bottom: 22px; }
@@ -344,13 +344,17 @@ kbd { font: 9px var(--mono); border: 1px solid #30303a; padding: 2px 4px; color:
 .public-podcast p { width: 100%; max-width: 450px; }
 .public-coming { color: #d7b45f; font: 8px var(--mono); letter-spacing: 1px; }
 .public-games { display: grid; grid-template-columns: 1.15fr .85fr; gap: clamp(22px, 6vw, 75px); align-items: center; }
-.public-games-image { position: relative; height: clamp(215px, 34vw, 390px); border: 1px solid #302a2b; background: #171214; }
-.public-games-image > img { opacity: .75; }
+.public-games-image, .public-world-image { position: relative; height: clamp(215px, 34vw, 390px); border: 1px solid #302a2b; background: #171214; }
+.public-games-image > img, .public-world-image > img { opacity: .75; }
 .public-games-image > span { position: absolute; left: 13px; bottom: 13px; padding: 7px 9px; background: #0b0a0cdb; }
 .public-games h3 { margin: 8px 0 0; color: #d7b45f; font-size: 13px; font-weight: 500; letter-spacing: .04em; }
 .public-games > div > p { max-width: 390px; margin-top: 15px; }
 .public-games .public-button { margin-top: 18px; }
-.public-arcade-note { display: block; margin-top: 9px; color: #817a7b; font-size: 9px; }
+.public-world { display: grid; grid-template-columns: 1.15fr .85fr; gap: clamp(22px, 6vw, 75px); align-items: center; border-top: 1px solid #302a2b; }
+.public-world-image > span { position: absolute; left: 13px; bottom: 13px; padding: 7px 9px; background: #0b0a0cdb; }
+.public-world > div > p { max-width: 430px; margin-top: 15px; }
+.public-world .public-button { margin-top: 18px; }
+.public-world-note { display: block; margin-top: 10px; color: #817a7b; font-size: 9px; }
 .public-desk, .public-network { display: grid; grid-template-columns: .9fr 1.1fr; gap: 30px; align-items: center; border-top: 1px solid #302a2b; }
 .public-desk { background: #100e0e; }
 .public-desk > div:last-child, .public-network > div:last-child { display: grid; justify-items: start; gap: 17px; }
@@ -379,7 +383,7 @@ kbd { font: 9px var(--mono); border: 1px solid #30303a; padding: 2px 4px; color:
   .public-hero-detail { max-width: 420px; font-size: 11px; line-height: 1.75; }
   .public-hero-index { margin-top: 42px; }
   .public-section { padding: 56px 19px; scroll-margin-top: 97px; }
-  .public-intro, .public-podcast, .public-games, .public-desk, .public-network { grid-template-columns: 1fr; gap: 19px; }
+  .public-intro, .public-podcast, .public-games, .public-world, .public-desk, .public-network { grid-template-columns: 1fr; gap: 19px; }
   .public-intro { align-items: start; }
   .public-intro > p, .public-section-copy { font-size: 12px; }
   .door-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -402,7 +406,7 @@ kbd { font: 9px var(--mono); border: 1px solid #30303a; padding: 2px 4px; color:
   .public-new-drops { flex-wrap: wrap; font-size: 8px; }
   .public-new-drops .public-eyebrow { width: 100%; }
   .public-podcast { gap: 18px; }
-  .public-games-image { height: 240px; }
+  .public-games-image, .public-world-image { height: 240px; }
   .public-desk, .public-network { gap: 17px; }
   .public-footer { grid-template-columns: 1fr; gap: 17px; padding: 25px 19px 30px; }
   .public-footer nav { gap: 16px; }
