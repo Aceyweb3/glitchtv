@@ -102,6 +102,8 @@ const navItems = [
   { label: 'Marketplace', icon: ShoppingBag }, { label: 'Messages', icon: MessageCircle },
 ];
 
+const ARCADE_URL = 'https://kurogami-arcade.vercel.app';
+
 function getTier(score) {
   return [...tiers].reverse().find((tier) => score >= tier.min) ?? tiers[0];
 }
@@ -148,6 +150,7 @@ function App() {
   const [score, setScore] = useState(loadScore);
   const [appData, setAppData] = useState(loadAppData);
   const [activeTab, setActiveTab] = useState('Home');
+  const [showLanding, setShowLanding] = useState(true);
   const [toast, setToast] = useState('');
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('For you');
@@ -180,10 +183,10 @@ function App() {
   useEffect(() => {
     const timeout = window.setTimeout(() => {
       setIsLoading(false);
-      setGuideOpen(localStorage.getItem('yugami-guide-seen') !== 'true');
+      if (!showLanding) setGuideOpen(localStorage.getItem('yugami-guide-seen') !== 'true');
     }, 950);
     return () => window.clearTimeout(timeout);
-  }, []);
+  }, [showLanding]);
   useEffect(() => {
     score.achievements.forEach((unlock) => {
       if (seenUnlocks.current.has(unlock.achievementId)) return;
@@ -499,10 +502,23 @@ function App() {
     .filter((item) => item.type.includes('COMIC') && (appData.readProgress[item.id] ?? 1) > 1 && !appData.readTitles.includes(item.id))
     .map((item) => ({ ...item, progress: Math.round(((appData.readProgress[item.id] - 1) / 2) * 100), label: 'CONTINUE READING' }));
 
+  if (showLanding) {
+    return <div className="app-shell public-shell">
+      <YugamiLanding
+        onEnter={() => { setShowLanding(false); setIsLoading(false); window.scrollTo({ top: 0 }); }}
+        onApply={() => setModal({ type: 'waitlist' })}
+      />
+      {modal && <Modal onClose={() => setModal(null)}>
+        {modal.type === 'waitlist' && <WaitlistForm email={appData.waitlistEmail} onSubmit={joinWaitlist} />}
+      </Modal>}
+      {toast && <div className="toast" role="status"><span className="toast-icon"><Check size={15} /></span><span>{toast}</span><button aria-label="Dismiss notification" onClick={() => setToast('')}><X size={15} /></button></div>}
+    </div>;
+  }
+
   return (
     <div className="app-shell">
       <header className="topbar">
-        <button className="brand" onClick={() => goTo('Home')} aria-label="YUGAMI home">
+        <button className="brand" onClick={() => { setShowLanding(true); goTo('Home'); }} aria-label="YUGAMI home">
           <span className="brand-mark"><Disc3 size={19} strokeWidth={2.2} /></span>
           <span><span className="brand-wordmark" data-text="YUGAMI">YUGAMI</span><small>OPEN STREAM NETWORK</small></span>
         </button>
@@ -601,6 +617,122 @@ function App() {
       {guideOpen && !isLoading && <WelcomeGuide onClose={finishGuide} />}
     </div>
   );
+}
+
+function YugamiLanding({ onEnter, onApply }) {
+  const doors = [
+    { title: 'Art', description: 'Originals and drops from resident artists. Collect and support the people building this world.', href: '#artists', action: 'Explore art', icon: Sparkles },
+    { title: 'Sound', description: 'AI music and visual drops led by Tom. The sonic identity of Yugami.', href: '#sound', action: 'Hear the signal', icon: Disc3 },
+    { title: 'Podcast', description: 'Conversations on culture, markets, and builders. Launch rail with Scholar.', href: '#podcast', action: 'Meet Yugami Radio', icon: Headphones },
+    { title: 'Shop', description: 'Art, merch, and limited drops. Physical and digital.', href: '#shop', action: 'Shop the drops', icon: ShoppingBag },
+    { title: 'Arcade', description: 'Kurogami Arcade: ten cabinets. Nine train attention. The tenth is Fracture Arena — build a Codex, enter the chamber, earn the desk.', href: ARCADE_URL, action: 'Enter Arcade', icon: Trophy, external: true },
+    { title: 'Desk', description: 'Process, curriculum, and trading structure for people who execute.', href: '#desk', action: 'Enter the desk', icon: Shield },
+    { title: 'Network', description: 'Members, events, and introductions. The social layer that keeps the system alive.', href: '#network', action: 'Find your people', icon: Users },
+  ];
+  const artists = [
+    { name: 'Lens', role: 'Resident artist', image: 'photo-1579783902614-a3fb3927b6a5', description: 'Original work and visual worlds.' },
+    { name: 'Jay', role: 'Resident artist', image: 'photo-1541961017774-22349e4a1262', description: 'Art, objects, and limited editions.' },
+    { name: 'Tom', role: 'Sound + moving image', image: 'photo-1519608487953-e999c86e7455', description: 'AI music and the Yugami visual signal.' },
+  ];
+  const products = [
+    { name: 'Yugami / Founding apparel', category: 'MERCH', image: 'photo-1551028719-00167b16eac5' },
+    { name: 'Lens / Original study', category: 'ART', image: 'photo-1579783902614-a3fb3927b6a5' },
+    { name: 'Arena / Session gear', category: 'ARENA-ADJACENT', image: 'photo-1541961017774-22349e4a1262' },
+  ];
+
+  return <>
+    <header className="public-nav">
+      <a className="public-wordmark" href="#top" aria-label="Yugami home"><Disc3 size={20} /> YUGAMI</a>
+      <nav aria-label="Main navigation">
+        {[['Home', '#top'], ['Art', '#artists'], ['Shop', '#shop'], ['Sound', '#sound'], ['Podcast', '#podcast'], ['Arcade', ARCADE_URL], ['Desk', '#desk']].map(([label, href]) => <a href={href} key={label} target={href === ARCADE_URL ? '_blank' : undefined} rel={href === ARCADE_URL ? 'noreferrer' : undefined}>{label}</a>)}
+      </nav>
+      <button className="public-enter" onClick={onEnter}>Enter Yugami <ArrowUpRight size={14} /></button>
+    </header>
+
+    <main>
+      <section className="public-hero" id="top">
+        <img src="https://images.unsplash.com/photo-1535223289827-42f1e9919769?auto=format&fit=crop&w=1800&q=85" alt="" fetchPriority="high" />
+        <div className="public-hero-content">
+          <span className="public-eyebrow">A CULTURE PLATFORM / MIAMI + BEYOND</span>
+          <h1>YUGAMI</h1>
+          <p className="public-positioning">The home for the artists, the sound, the desk, the arcade, and the people building in public.</p>
+          <p className="public-hero-detail">Art on the walls. Music in the feed. Merch in the store. Podcast on the mic.<br />Arcade for attention and the chamber. Desk for operators.</p>
+          <div className="public-actions">
+            <button className="public-button public-button-gold" onClick={onEnter}>Enter Yugami <ArrowUpRight size={15} /></button>
+            <a className="public-button public-button-outline" href="#shop">Shop <ArrowUpRight size={15} /></a>
+            <a className="public-button public-button-quiet" href={ARCADE_URL} target="_blank" rel="noreferrer">Enter Arcade <ArrowUpRight size={15} /></a>
+          </div>
+          <span className="public-hero-index">ART / SOUND / PEOPLE / PLAY</span>
+        </div>
+      </section>
+
+      <section className="public-section public-intro" id="about">
+        <div className="public-section-heading"><span className="public-eyebrow">01 / WHAT IS YUGAMI</span><h2>One home.<br /><em>Many doors.</em></h2></div>
+        <p>Yugami is the single public home for culture, creation, play, and operation. Not a linktree. Coordinated doors into one world. Deeper infrastructure — the desk and chamber path — sits under the Arcade and Desk doors.</p>
+      </section>
+
+      <section className="public-section" id="doors">
+        <div className="public-section-title"><span className="public-eyebrow">02 / FIND YOUR WAY IN</span><h2>Choose a door.</h2></div>
+        <div className="door-grid">{doors.map(({ title, description, href, action, icon: Icon, external }, index) => <a className="door-card" href={href} key={title} target={external ? '_blank' : undefined} rel={external ? 'noreferrer' : undefined}>
+          <span className="door-number">0{index + 1}</span><Icon size={20} /><h3>{title}</h3><p>{description}</p><span className="door-link">{action} <ArrowUpRight size={13} /></span>
+        </a>)}</div>
+      </section>
+
+      <section className="public-section public-shop" id="shop">
+        <div className="public-section-title public-shop-heading"><div><span className="public-eyebrow">03 / THE STORE</span><h2>Merch + art.</h2></div><span className="public-section-note">ART / MERCH / LIMITED + ARENA-ADJACENT</span></div>
+        <p className="public-section-copy">Merch and founding art fund the people and the platform — not random product.</p>
+        <div className="public-product-grid">{products.map((product) => <article className="public-product-card" key={product.name}>
+          <div className="public-product-image"><img src={`https://images.unsplash.com/${product.image}?auto=format&fit=crop&w=750&q=75`} alt="" loading="lazy" /><span>{product.category}</span></div>
+          <div className="public-product-info"><div><h3>{product.name}</h3><span>Price soon</span></div><button onClick={onEnter}>Enter Yugami</button></div>
+        </article>)}</div>
+      </section>
+
+      <section className="public-section" id="artists">
+        <div className="public-section-title"><span className="public-eyebrow">04 / THE PEOPLE MAKING IT</span><h2>Artists.</h2></div>
+        <div className="public-artist-grid">{artists.map((artist) => <article className="public-artist-card" key={artist.name}>
+          <img src={`https://images.unsplash.com/${artist.image}?auto=format&fit=crop&w=800&q=75`} alt="" loading="lazy" />
+          <div><span className="public-eyebrow">{artist.role}</span><h3>{artist.name}</h3><p>{artist.description}</p><a href={artist.name === 'Tom' ? '#sound' : '#shop'}>View work <ArrowUpRight size={13} /></a></div>
+        </article>)}</div>
+      </section>
+
+      <section className="public-section public-feature" id="sound">
+        <div className="public-section-title"><span className="public-eyebrow">05 / CONTENT SPEARHEAD</span><h2>Tom sets the tone.</h2></div>
+        <p className="public-section-copy">AI music videos are the launch engine. New sound and image, built in public.</p>
+        <div className="public-video-placeholder">
+          <img src="https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1400&q=80" alt="" loading="lazy" />
+          <div><span className="public-eyebrow">FLAGSHIP VIDEO / ADD VIDEO URL</span><strong>Yugami, in motion.</strong><span>Video embed coming soon</span></div>
+          <span className="public-play-mark"><Play size={22} fill="currentColor" /></span>
+        </div>
+        <div className="public-new-drops"><span className="public-eyebrow">NEW DROPS</span><span>AI music / Visuals / Tom</span><span>First release soon</span></div>
+      </section>
+
+      <section className="public-section public-podcast" id="podcast">
+        <div><span className="public-eyebrow">06 / ON THE MIC</span><h2>Scholar presents<br /><em>Yugami Radio.</em></h2></div>
+        <div><p>Conversations on culture, markets, and the people building what comes next.</p><span className="public-coming">EPISODES SOON</span><button className="public-button public-button-outline" disabled>Listen / Follow <ArrowUpRight size={14} /></button></div>
+      </section>
+
+      <section className="public-section public-games" id="arcade">
+        <div className="public-games-image"><img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200&q=80" alt="" loading="lazy" /><span className="public-eyebrow">KUROGAMI ARCADE / CABINETS 01—10</span></div>
+        <div><span className="public-eyebrow">07 / PLAY INSIDE THE WORLD</span><h2>Arcade.</h2><h3>Kurogami Arcade</h3><p>A dojo of attention built as an arcade. Nine short cabinets train space, form, timing, order, patience, repair, and restraint.<br />The tenth cabinet is Fracture Arena — contested play, Codex and Forge, path to the desk.</p><a className="public-button public-button-gold" href={ARCADE_URL} target="_blank" rel="noreferrer">Enter Arcade <ArrowUpRight size={14} /></a><span className="public-arcade-note">Fracture Arena is cabinet 10 inside the Arcade.</span></div>
+      </section>
+
+      <section className="public-section public-desk" id="desk">
+        <div><span className="public-eyebrow">08 / FOR THE OPERATORS</span><h2>Process, not just entertainment.</h2></div>
+        <div><p>The desk is for people who want structure: a working process, a curriculum, and a place to execute. The deeper infrastructure sits underneath.</p><button className="public-button public-button-gold" onClick={onApply}>Join the operator waitlist <ArrowUpRight size={14} /></button></div>
+      </section>
+
+      <section className="public-section public-network" id="network">
+        <div><span className="public-eyebrow">09 / NETWORK + EVENTS</span><h2>Built together.<br /><em>In real life.</em></h2></div>
+        <div id="contact"><p>Nights, painting, music, and builders in Miami and beyond. The people are part of the platform.</p><button className="public-button public-button-outline" onClick={onApply}>Enter / Apply <ArrowUpRight size={14} /></button><span className="public-section-note">EVENTS / MIAMI + BEYOND</span></div>
+      </section>
+    </main>
+
+    <footer className="public-footer">
+      <p>Yugami is the house. The Arcade is the game floor. The desk is for operators.</p>
+      <nav aria-label="Footer navigation"><a href="#shop">Shop</a><a href="#artists">Art</a><a href={ARCADE_URL} target="_blank" rel="noreferrer">Arcade</a><a href="#desk">Desk</a><button onClick={onEnter}>Enter</button></nav>
+      <span>YUGAMI / KUROGAMI</span>
+    </footer>
+  </>;
 }
 
 function MediaCard({ item, onAction, read = false }) {
