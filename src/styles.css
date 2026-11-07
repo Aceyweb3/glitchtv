@@ -335,13 +335,8 @@ kbd { font: 9px var(--mono); border: 1px solid #30303a; padding: 2px 4px; color:
 .public-artist-card a { display: inline-flex; align-items: center; gap: 5px; margin-top: 15px; color: #d7b45f; text-decoration: none; font: 8px var(--mono); }
 .public-feature { border-top: 1px solid #302a2b; }
 .public-feature .public-section-copy { margin-top: -12px; margin-bottom: 22px; }
-.public-video-placeholder { position: relative; display: flex; align-items: flex-end; min-height: clamp(220px, 43vw, 490px); overflow: hidden; border: 1px solid #302a2b; background: #121012; }
-.public-video-placeholder > img { position: absolute; inset: 0; opacity: .56; }
-.public-video-placeholder::after { position: absolute; content: ''; inset: 0; background: linear-gradient(0deg, #0b0a0cf2, transparent 75%); }
-.public-video-placeholder > div { z-index: 1; display: grid; gap: 9px; padding: clamp(17px, 4vw, 34px); }
-.public-video-placeholder > div strong { color: #f3efe8; font-size: clamp(20px, 3.5vw, 34px); font-weight: 500; }
-.public-video-placeholder > div > span:last-child { color: #aaa2a2; font-size: 10px; }
-.public-play-mark { position: absolute; z-index: 1; top: 50%; left: 50%; display: grid; place-items: center; width: 55px; height: 55px; transform: translate(-50%, -50%); border: 1px solid #d7b45f99; border-radius: 50%; color: #e7c96f; background: #0b0a0c70; }
+.public-video-frame { position: relative; min-height: clamp(220px, 43vw, 490px); overflow: hidden; border: 1px solid #302a2b; background: #121012; }
+.public-feature-video { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
 .public-new-drops { display: flex; justify-content: space-between; gap: 12px; padding: 15px 1px; border-bottom: 1px solid #302a2b; color: #aaa2a2; font-size: 9px; }
 .public-new-drops > span:not(:first-child) { font-family: var(--mono); }
 .public-podcast { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; align-items: end; border-top: 1px solid #302a2b; border-bottom: 1px solid #302a2b; background: #100e0e; }
@@ -403,7 +398,7 @@ kbd { font: 9px var(--mono); border: 1px solid #30303a; padding: 2px 4px; color:
   .public-artist-card p { font-size: 9px; }
   .public-artist-card a { margin-top: 11px; }
   .public-feature .public-section-copy { margin-top: -11px; }
-  .public-video-placeholder { min-height: 250px; }
+  .public-video-frame { min-height: 250px; }
   .public-new-drops { flex-wrap: wrap; font-size: 8px; }
   .public-new-drops .public-eyebrow { width: 100%; }
   .public-podcast { gap: 18px; }

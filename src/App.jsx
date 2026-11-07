@@ -698,10 +698,11 @@ function YugamiLanding({ onEnter, onApply }) {
       <section className="public-section public-feature" id="sound">
         <div className="public-section-title"><span className="public-eyebrow">05 / CONTENT SPEARHEAD</span><h2>Tom sets the tone.</h2></div>
         <p className="public-section-copy">AI music videos are the launch engine. New sound and image, built in public.</p>
-        <div className="public-video-placeholder">
-          <img src="https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1400&q=80" alt="" loading="lazy" />
-          <div><span className="public-eyebrow">FLAGSHIP VIDEO / ADD VIDEO URL</span><strong>Yugami, in motion.</strong><span>Video embed coming soon</span></div>
-          <span className="public-play-mark"><Play size={22} fill="currentColor" /></span>
+        <div className="public-video-frame">
+          <video className="public-feature-video" aria-label="Tom's featured video" controls playsInline preload="metadata" poster="https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1400&q=80">
+            <source src="/assets/tom%20video.mov" type="video/mp4" />
+            Your browser does not support video playback.
+          </video>
         </div>
         <div className="public-new-drops"><span className="public-eyebrow">NEW DROPS</span><span>AI music / Visuals / Tom</span><span>First release soon</span></div>
       </section>
