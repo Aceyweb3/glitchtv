@@ -104,6 +104,7 @@ const navItems = [
 
 const ARCADE_URL = 'https://kurogami-arcade.vercel.app';
 const WORLD_URL = 'https://kurogami-v1.vercel.app/#top';
+const YUGAMI_HERO_IMAGE = '/assets/yugami-hero.jpg';
 
 const publicNavLinks = [
   { label: 'Home', href: '#top' },
@@ -535,6 +536,7 @@ function App() {
         {modal.type === 'waitlist' && <WaitlistForm email={appData.waitlistEmail} onSubmit={joinWaitlist} />}
       </Modal>}
       {toast && <div className="toast" role="status"><span className="toast-icon"><Check size={15} /></span><span>{toast}</span><button aria-label="Dismiss notification" onClick={() => setToast('')}><X size={15} /></button></div>}
+      {isLoading && <LoadingScreen />}
     </div>;
   }
 
@@ -665,7 +667,7 @@ function YugamiLanding({ onEnter, onApply }) {
 
     <main>
       <section className="public-hero" id="top">
-        <img src="https://images.unsplash.com/photo-1535223289827-42f1e9919769?auto=format&fit=crop&w=1800&q=85" alt="" fetchPriority="high" />
+        <img src={YUGAMI_HERO_IMAGE} alt="" fetchPriority="high" />
         <div className="public-hero-content">
           <span className="public-eyebrow">A CULTURE PLATFORM / MIAMI + BEYOND</span>
           <h1>YUGAMI</h1>
@@ -910,7 +912,7 @@ function NavigationMenu({ onNavigate }) {
 }
 
 function LoadingScreen() {
-  return <div className="boot-screen" role="status" aria-label="Loading YUGAMI"><div className="boot-brand"><Disc3 size={34} /><span>YUGAMI</span></div><div className="boot-signal"><i /></div><div className="boot-caption"><span>ESTABLISHING SIGNAL</span><span>YUGAMI NETWORK / 01</span></div></div>;
+  return <div className="boot-screen" role="status" aria-label="Loading YUGAMI"><img className="boot-image" src={YUGAMI_HERO_IMAGE} alt="" /><div className="boot-brand"><Disc3 size={34} /><span>YUGAMI</span></div><div className="boot-signal"><i /></div><div className="boot-caption"><span>ESTABLISHING SIGNAL</span><span>YUGAMI NETWORK / 01</span></div></div>;
 }
 
 const guideSlides = [
