@@ -1,10 +1,19 @@
 # YUGAMI
 
-**Open stream network.**
+**The first Kurogami city. One map. Many doors.**
 
-YUGAMI is a home base for independent creators and their shorts, videos, and comics. It brings discovery, reading and watching, community, creator drops, and local demo experiences together. Live distribution can stay on channels like TikTok.
+Yugami is the public house and first city in the Kurogami stack. Each door is a district for art, sound, shop, arcade, world, community, or the operator desk. Kurogami is the city’s stack and law: process, agents, data, and keys. Hubs begin human-run and may become agentic over time.
 
-Owned by Kurogami / Gami Boyz.
+The world, arcade, and desk are where utility lives. A key or crest is admission that brings the city to life; it is not a bundle of bolted-on perks. Yugami City is a living roadmap, with open districts and others still in build.
+
+The public navigation introduces each district before its call to action opens the corresponding tool. The city map is a high-tech schematic, not a live geographic map.
+
+## Live districts
+
+- [Kurogami Arcade](https://kurogami-arcade.vercel.app) — ten cabinets; Fracture Arena is cabinet ten.
+- [Kurogami World](https://kurogami-v1.vercel.app/#top) — Shadow Brickell and the Fracture Dojo.
+
+The Brief Tower and Outer Veil are roadmap districts. No official platform partnership is implied.
 
 ## Development
 
@@ -13,4 +22,4 @@ npm install
 npm run dev
 ```
 
-The app is a client-side React experience. Profiles, posts, votes, messages, parties, clips, and demo orders are stored locally in the browser. Playback, live streaming, payments, shipping, and creator payouts are not connected.
+The client-side React experience stores profiles, posts, votes, messages, parties, clips, and demo orders in the browser. Playback, live streaming, payments, shipping, and creator payouts are not connected.
