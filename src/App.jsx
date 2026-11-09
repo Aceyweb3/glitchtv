@@ -108,25 +108,18 @@ const YUGAMI_HERO_IMAGE = '/assets/yugami-hero.jpg';
 const YUGAMI_LOGO_IMAGE = '/assets/yugami-logo-square.svg';
 
 const publicNavLinks = [
-  { label: 'Home', href: '#top' },
-  { label: 'City', href: '#city-map' },
-  { label: 'Art', href: '#artists' },
-  { label: 'Shop', href: '#shop' },
-  { label: 'Sound', href: '#sound' },
-  { label: 'Podcast', href: '#podcast' },
-  { label: 'Arcade', href: '#arcade' },
-  { label: 'World', href: '#world' },
+  { label: 'Arcade', href: ARCADE_URL, external: true },
   { label: 'Desk', href: '#desk' },
-  { label: 'Brief', href: '#brief' },
+  { label: 'Shop', href: '#shop' },
 ];
 
 const publicDoors = [
   { title: 'The House', status: 'open', description: 'Plaza and orientation. Every door starts here.', href: '#top', action: 'Enter Yugami', icon: Home },
   { title: 'Atelier Row', status: 'open', description: 'Originals, drops, merch, and resident artists.', href: '#artists', action: 'Explore Atelier Row', icon: Sparkles },
   { title: 'Resonance', status: 'open', description: 'Music, sets, stories, and the podcast.', href: '#sound', action: 'Explore Resonance', icon: Disc3 },
-  { title: 'The Arcade', status: 'open', description: 'Ten cabinets. Nine train attention. The tenth is Fracture Arena — a contested chamber and path toward the desk.', href: ARCADE_URL, action: 'Enter Arcade', icon: Trophy, external: true },
+  { title: 'The Arcade', status: 'open', description: 'Ten cabinets. Nine train attention. The tenth is Fracture — path toward the desk.', href: ARCADE_URL, action: 'Enter Arcade', icon: Trophy, external: true },
   { title: 'Fracture Dojo', status: 'open', description: 'Shadow city onboarding: Genesis crest, Veil Keeper, districts, factions, and the Nur Codex. The key opens the map.', href: WORLD_URL, action: 'Enter World', icon: Compass, external: true },
-  { title: 'The Desk', status: 'gated', description: 'Operator quarter. Process, structure, and seats — a serious lane apart from entertainment.', href: '#desk', action: 'Operator path', icon: Shield },
+  { title: 'The Desk', status: 'gated', description: 'A measured operator track centered on process, structure, and responsibility.', href: '#desk', action: 'Operator track', icon: Shield },
   { title: 'Brief Tower', status: 'next', description: 'The city’s signal: what the desk and the districts are paying attention to.', href: '#brief', action: 'Brief preview', icon: Radio },
   { title: 'Guild Courts', status: 'next', description: 'Members, events, introductions, factions, and halls.', href: '#network', action: 'Visit the courts', icon: Users },
 ];
@@ -135,12 +128,12 @@ const cityDistricts = [
   { name: 'The House', status: 'open', description: 'The plaza for orientation. Every door starts here.', href: '#top', action: 'Enter Yugami', icon: Home, mapPosition: ['50%', '50%'] },
   { name: 'Atelier Row', status: 'open', description: 'Art, resident artists, drops, and the shop.', href: '#artists', action: 'Visit Atelier Row', icon: Sparkles, mapPosition: ['24%', '29%'] },
   { name: 'Resonance', status: 'open', description: 'Sound and podcast. Creators keep ownership; played work stays attributable under clear terms.', href: '#sound', action: 'Explore Resonance', icon: Disc3, mapPosition: ['70%', '20%'] },
-  { name: 'The Arcade', status: 'open', description: 'Ten cabinets train attention. Fracture Arena is the tenth: a contested chamber and path toward the desk.', href: ARCADE_URL, action: 'Enter Arcade', icon: Trophy, external: true, mapPosition: ['80%', '56%'] },
+  { name: 'The Arcade', status: 'open', description: 'Ten cabinets. Nine train attention. The tenth is Fracture — path toward the desk.', href: ARCADE_URL, action: 'Enter Arcade', icon: Trophy, external: true, mapPosition: ['80%', '56%'] },
   { name: 'Fracture Dojo', status: 'open', description: 'Genesis crest, Veil Keeper, portals, districts, factions, and the Nur Codex. The key opens the map.', href: WORLD_URL, action: 'Enter World', icon: Compass, external: true, mapPosition: ['53%', '24%'] },
   { name: 'The Verticals', status: 'next', description: 'Motors, Estates, Vault, Marina, Hangar, and Sanctum as thematic city wings — not a one-to-one Brickell copy.', icon: Building2, mapPosition: ['20%', '68%'] },
   { name: 'Guild Courts', status: 'next', description: 'Factions, halls, members, and places to gather.', icon: Users, mapPosition: ['42%', '78%'] },
   { name: 'Brief Tower', status: 'next', description: 'Dispatches and signal on what the desk and city are paying attention to.', href: '#brief', action: 'Brief preview', icon: Radio, mapPosition: ['76%', '32%'] },
-  { name: 'The Desk', status: 'gated', description: 'Operator quarter. Process, structure, and seats.', href: '#desk', action: 'Operator path', icon: Shield, mapPosition: ['55%', '75%'] },
+  { name: 'The Desk', status: 'gated', description: 'A measured operator track centered on process, structure, and responsibility.', href: '#desk', action: 'Operator track', icon: Shield, mapPosition: ['55%', '75%'] },
   { name: 'Outer Veil', status: 'later', description: 'A bridge into the live open-world street. Same culture, larger map.', icon: ArrowUpRight, mapPosition: ['88%', '78%'] },
 ];
 
@@ -661,6 +654,7 @@ function App() {
 }
 
 function YugamiLanding({ onEnter, onApply }) {
+  const [selectedDistrict, setSelectedDistrict] = useState(null);
   const artists = [
     { name: 'Lens', role: 'Resident artist', image: 'photo-1579783902614-a3fb3927b6a5', description: 'Original work and visual worlds.' },
     { name: 'Jay', role: 'Resident artist', image: 'photo-1541961017774-22349e4a1262', description: 'Art, objects, and limited editions.' },
@@ -688,7 +682,7 @@ function YugamiLanding({ onEnter, onApply }) {
           <span className="public-eyebrow">THE FIRST KUROGAMI CITY</span>
           <h1>YUGAMI</h1>
           <p className="public-positioning">The first Kurogami city.</p>
-          <p className="public-hero-detail">Art, sound, shop, arcade, world, desk, and signal under one map. The key is how you move through it.</p>
+          <p className="public-hero-detail">Art, sound, stories, and independent work — with doors into the Arcade and a measured operator track.</p>
           <div className="public-actions">
             <button className="public-button public-button-gold" onClick={onEnter}>Enter Yugami <ArrowUpRight size={15} /></button>
             <a className="public-button public-button-outline" href="#shop">Shop <ArrowUpRight size={15} /></a>
@@ -700,8 +694,8 @@ function YugamiLanding({ onEnter, onApply }) {
       </section>
 
       <section className="public-section public-intro" id="about">
-        <div className="public-section-heading"><span className="public-eyebrow">01 / THE CITY AND ITS STACK</span><h2>One map.<br /><em>Many districts.</em></h2></div>
-        <p>Yugami is the first Kurogami city. Kurogami is its stack and law: process, agents, data, and keys. Each door is a district. The world, arcade, and desk hold the utility; the key or crest is admission that brings the city to life. Hubs start human-run. They may become agentic over time.</p>
+        <div className="public-section-heading"><span className="public-eyebrow">01 / THE CITY</span><h2>One map.<br /><em>Many districts.</em></h2></div>
+        <p>Yugami is a home for art, sound, stories, and independent work. Explore the shop, meet resident artists, listen in, or step into the Arcade. The Desk is a separate operator track.</p>
       </section>
 
       <section className="public-section" id="doors">
@@ -747,7 +741,7 @@ function YugamiLanding({ onEnter, onApply }) {
 
       <section className="public-section public-games" id="arcade">
         <div className="public-games-image"><img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200&q=80" alt="" loading="lazy" /><span className="public-eyebrow">KUROGAMI ARCADE / CABINETS 01—10</span></div>
-        <div><span className="public-eyebrow">05 / THE GAME FLOOR</span><h2>Arcade.</h2><h3>Kurogami Arcade</h3><p>Nine cabinets train attention: space, form, timing, order, patience, repair, and restraint. Cabinet 10 is Fracture Arena — the contested chamber and path toward the desk.</p><a className="public-button public-button-gold" href={ARCADE_URL} target="_blank" rel="noreferrer">Enter Arcade <ArrowUpRight size={14} /></a></div>
+        <div><span className="public-eyebrow">05 / THE GAME FLOOR</span><h2>Arcade.</h2><h3>Kurogami Arcade</h3><p>Ten cabinets. Nine train attention. The tenth is Fracture — path toward the desk.</p><a className="public-button public-button-gold" href={ARCADE_URL} target="_blank" rel="noreferrer">Enter Arcade <ArrowUpRight size={14} /></a></div>
       </section>
 
       <section className="public-section public-world" id="world">
@@ -774,22 +768,40 @@ function YugamiLanding({ onEnter, onApply }) {
               <path className="city-map-transit" d="M30 260 C240 200 330 310 505 250 S780 185 970 270" />
               <path className="city-map-water" d="M950 -20 C890 105 1020 170 945 275 S895 410 980 520" />
             </svg>
-            {cityDistricts.map(({ name, status, mapPosition }) => (
-              <a className={`city-map-node city-map-node-${status}`} href={`#district-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`} key={name} style={{ '--map-x': mapPosition[0], '--map-y': mapPosition[1] }} aria-label={`Locate ${name} district`}>
-                <i /><span>{name}</span>
-              </a>
+            {cityDistricts.map((district) => (
+              <button
+                className={`city-map-node city-map-node-${district.status} ${selectedDistrict?.name === district.name ? 'city-map-node-selected' : ''}`}
+                type="button"
+                key={district.name}
+                style={{ '--map-x': district.mapPosition[0], '--map-y': district.mapPosition[1] }}
+                aria-label={`Show ${district.name} district details`}
+                aria-pressed={selectedDistrict?.name === district.name}
+                aria-controls="city-map-detail"
+                onClick={() => setSelectedDistrict(district)}
+              >
+                <i /><span>{district.name}</span>
+              </button>
             ))}
             <span className="city-map-coordinate coordinate-north">SECTOR A / 01</span>
             <span className="city-map-coordinate coordinate-south">GRID 04 / 10</span>
           </div>
-          <div className="city-map-bottomline"><span>10 DISTRICTS / 04 ACCESS STATES</span><a href="#district-the-house">EXPLORE DISTRICTS <ArrowDownRight size={12} /></a></div>
+          <div className="city-map-detail-slot" aria-live="polite">
+            {selectedDistrict ? (
+              <div className="city-map-detail" id="city-map-detail" key={selectedDistrict.name} role="region" aria-label={`${selectedDistrict.name} district details`}>
+                <div className="city-map-detail-heading">
+                  <selectedDistrict.icon size={19} aria-hidden="true" />
+                  <div><span className="public-eyebrow">DISTRICT BREAKDOWN / {selectedDistrict.status.toUpperCase()}</span><h3>{selectedDistrict.name}</h3></div>
+                </div>
+                <p>{selectedDistrict.description}</p>
+                {selectedDistrict.href && <a className="door-link" href={selectedDistrict.href} target={selectedDistrict.external ? '_blank' : undefined} rel={selectedDistrict.external ? 'noreferrer' : undefined}>{selectedDistrict.action} <ArrowUpRight size={13} /></a>}
+                <button className="city-map-detail-close" type="button" aria-label={`Close ${selectedDistrict.name} details`} onClick={() => setSelectedDistrict(null)}><X size={15} /></button>
+              </div>
+            ) : (
+              <p className="city-map-detail-empty" id="city-map-detail">Select a district on the map to open its breakdown.</p>
+            )}
+          </div>
+          <div className="city-map-bottomline"><span>10 DISTRICTS / 04 ACCESS STATES</span><span>SELECT A DISTRICT TO EXPLORE</span></div>
         </div>
-        <div className="city-district-grid">{cityDistricts.map(({ name, status, description, href, action, icon: Icon, external }) => <article className={`city-district city-district-${status.toLowerCase()}`} id={`district-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`} key={name}>
-          <div className="city-district-top"><Icon size={18} /><span className={`city-status city-status-${status}`}>{status}</span></div>
-          <h3>{name}</h3>
-          <p>{description}</p>
-          {href && <a className="door-link" href={href} target={external ? '_blank' : undefined} rel={external ? 'noreferrer' : undefined}>{action} <ArrowUpRight size={13} /></a>}
-        </article>)}</div>
         <p className="city-legend"><span><i className="city-legend-open" />Open = enter from Yugami today</span><span><i className="city-legend-next" />Next = in build</span><span><i className="city-legend-later" />Later = live city layer</span><span><i className="city-legend-gated" />Gated = operator path</span></p>
         <div className="outer-veil">
           <div><span className="public-eyebrow">THE FUTURE CITY LAYER</span><h3>Outer Veil — When the street goes live</h3></div>
@@ -804,19 +816,19 @@ function YugamiLanding({ onEnter, onApply }) {
 
       <section className="public-section public-desk" id="desk">
         <div><span className="public-eyebrow">08 / THE OPERATOR QUARTER</span><h2>The Desk.</h2></div>
-        <div><p>A serious lane for process, structure, and seats. Separate from World play and Arcade entertainment.</p><button className="public-button public-button-gold" onClick={onApply}>Apply for the operator path <ArrowUpRight size={14} /></button></div>
+        <div><p>A measured operator track centered on process, structure, and responsibility.</p><button className="public-button public-button-gold" onClick={onApply}>Apply to the operator track <ArrowUpRight size={14} /></button></div>
       </section>
 
       <section className="public-section public-network" id="network">
         <div><span className="public-eyebrow">09 / GUILD COURTS</span><h2>Built together.<br /><em>In real life.</em></h2></div>
-        <div id="contact"><p>Nights, painting, music, and builders in Miami and beyond. The people are part of the platform.</p><button className="public-button public-button-outline" onClick={onApply}>Enter / Apply <ArrowUpRight size={14} /></button><span className="public-section-note">EVENTS / MIAMI + BEYOND</span></div>
+        <div id="contact"><p>Nights, painting, music, and builders in Miami and beyond. The people are part of the platform. We grade process and capacity under pressure — not hype.</p><button className="public-button public-button-outline" onClick={onApply}>Enter / Apply <ArrowUpRight size={14} /></button><span className="public-section-note">EVENTS / MIAMI + BEYOND</span></div>
       </section>
     </main>
 
     <footer className="public-footer">
-      <p>Yugami is the first Kurogami city. Arcade is the game floor. World is the map. Desk is for operators. Brief is the signal.</p>
+      <p>A home for art, sound, stories, and independent work — with Arcade and Desk as distinct doors.</p>
       <strong className="public-footer-doctrine">The key is admission. The districts are the product.</strong>
-      <nav aria-label="Footer navigation"><a href="#shop">Shop</a><a href="#arcade">Arcade</a><a href="#world">World</a><a href="#desk">Desk</a><a href="#city-map">City</a><a href="#brief">Brief</a><button onClick={onEnter}>Enter</button></nav>
+      <nav aria-label="Footer navigation"><a href={ARCADE_URL} target="_blank" rel="noreferrer">Arcade</a><a href="#desk">Desk</a><a href="#shop">Shop</a><button onClick={onEnter}>Enter</button></nav>
       <span className="public-footer-brand"><img src={YUGAMI_LOGO_IMAGE} alt="" /> YUGAMI / KUROGAMI</span>
     </footer>
   </>;

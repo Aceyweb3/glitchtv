@@ -10,7 +10,7 @@ The public navigation introduces each district before its call to action opens t
 
 ## Live districts
 
-- [Kurogami Arcade](https://kurogami-arcade.vercel.app) — ten cabinets; Fracture Arena is cabinet ten.
+- [Kurogami Arcade](https://kurogami-arcade.vercel.app) — ten cabinets; Fracture is cabinet ten and a path toward the desk.
 - [Kurogami World](https://kurogami-v1.vercel.app/#top) — Shadow Brickell and the Fracture Dojo.
 
 The Brief Tower and Outer Veil are roadmap districts. No official platform partnership is implied.
