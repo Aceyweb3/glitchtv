@@ -28,9 +28,8 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px
 .app-shell { min-height: 100vh; padding-bottom: 75px; background-image: linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px); background-size: 48px 48px; }
 .topbar { height: 68px; border-bottom: 1px solid var(--border); background: rgba(7,7,11,.96); display: flex; align-items: center; padding: 0 4.2%; gap: 48px; position: sticky; top: 0; z-index: 20; }
 .brand { display: flex; align-items: center; gap: 9px; border: 0; background: none; color: var(--text); padding: 0; text-align: left; cursor: pointer; font-size: 16px; font-weight: 700; letter-spacing: 1.4px; line-height: 1; }
-.brand-mark { color: var(--cyan); display: grid; place-items: center; width: 31px; height: 31px; overflow: hidden; border: 1px solid #d7b45f66; position: relative; }
-.brand-mark img, .public-wordmark img, .boot-brand img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
-.brand-mark::after { content: ''; width: 4px; height: 4px; background: var(--magenta); position: absolute; right: -2px; top: -2px; }
+.brand-mark { color: var(--cyan); display: grid; place-items: center; width: 42px; height: 42px; overflow: hidden; position: relative; }
+.brand-mark img, .public-wordmark img, .boot-brand img, .public-footer-brand img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; mix-blend-mode: screen; }
 .brand-tv { color: var(--cyan); }
 .brand small { display: block; color: var(--muted); font: 8px var(--mono); letter-spacing: 1.3px; margin-top: 5px; }
 .topbar-search { display: flex; align-items: center; gap: 11px; width: min(380px, 40vw); background: #0e0e14; border: 1px solid #24242d; padding: 9px 12px; color: var(--muted); transition: border-color .2s, box-shadow .2s; }
@@ -217,7 +216,7 @@ kbd { font: 9px var(--mono); border: 1px solid #30303a; padding: 2px 4px; color:
 .boot-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 58%; opacity: .48; }
 .boot-screen::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, #08070dd9, #08070d66 52%, #08070d99), linear-gradient(0deg, #08070de8, transparent 56%); pointer-events: none; }
 .boot-brand, .boot-signal, .boot-caption { position: relative; z-index: 1; }
-.boot-brand { display: flex; align-items: center; gap: 12px; color: var(--purple); font-size: 22px; font-weight: 700; letter-spacing: 2px; }.boot-brand img { width: 48px; height: 48px; border: 1px solid #d7b45f66; }.boot-brand span span { color: var(--text); }
+.boot-brand { display: flex; align-items: center; gap: 12px; color: var(--purple); font-size: 22px; font-weight: 700; letter-spacing: 2px; }.boot-brand img { width: 58px; height: 58px; }.boot-brand span span { color: var(--text); }
 .boot-signal { width: 180px; height: 2px; background: #ffffff16; overflow: hidden; }.boot-signal i { display: block; width: 38%; height: 100%; background: var(--purple); box-shadow: 0 0 15px var(--purple); animation: boot-sweep .95s ease-in-out infinite; }
 .boot-caption { width: 180px; display: flex; justify-content: space-between; color: #77717f; font: 7px var(--mono); letter-spacing: .6px; }
 .guide-backdrop { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 20px; background: #08070dc9; backdrop-filter: blur(12px) saturate(.7); animation: guide-in .35s ease both; touch-action: pan-y; }
@@ -275,7 +274,7 @@ kbd { font: 9px var(--mono); border: 1px solid #30303a; padding: 2px 4px; color:
 .public-shell { padding: 0; background-color: #0b0a0c; background-image: none; }
 .public-nav { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: 25px; min-height: 67px; padding: 0 clamp(18px, 5vw, 76px); border-bottom: 1px solid #302a2b; background: rgba(11,10,12,.96); backdrop-filter: blur(14px); }
 .public-wordmark { display: inline-flex; align-items: center; gap: 9px; color: #f3efe8; text-decoration: none; font-size: 15px; font-weight: 700; letter-spacing: 2px; white-space: nowrap; }
-.public-wordmark img { width: 40px; height: 40px; border: 1px solid #d7b45f66; }
+.public-wordmark img { width: 48px; height: 48px; }
 .public-nav nav { display: flex; align-items: center; justify-content: center; gap: clamp(13px, 2.1vw, 30px); }
 .public-nav nav a, .public-footer nav a, .public-footer nav button { color: #a59da0; text-decoration: none; font: 10px var(--mono); transition: color .2s; }
 .public-nav nav a:hover, .public-footer nav a:hover, .public-footer nav button:hover { color: #e6ca82; }
@@ -371,7 +370,7 @@ kbd { font: 9px var(--mono); border: 1px solid #30303a; padding: 2px 4px; color:
 .city-map-topline { border-bottom: 1px solid #292621; }
 .city-map-topline span:last-child { display: inline-flex; align-items: center; gap: 7px; color: #777274; }
 .city-map-topline i { width: 5px; height: 5px; border-radius: 50%; background: #a7c982; box-shadow: 0 0 8px #a7c982a0; }
-.city-map { position: relative; aspect-ratio: 2.15 / 1; min-height: 330px; overflow: hidden; background-color: #0d0e0e; background-image: linear-gradient(#ffffff08 1px, transparent 1px), linear-gradient(90deg, #ffffff08 1px, transparent 1px), radial-gradient(ellipse at 50% 50%, #d7b45f0a, transparent 62%); background-size: 34px 34px, 34px 34px, auto; }
+.city-map { position: relative; aspect-ratio: 2.15 / 1; min-height: 330px; overflow: hidden; background-color: #0d0e0e; background-image: linear-gradient(#ffffff08 1px, transparent 1px), linear-gradient(90deg, #ffffff08 1px, transparent 1px), linear-gradient(#0d0e0e30, #0d0e0e30), radial-gradient(ellipse at 50% 50%, #d7b45f0a, transparent 62%), url('/assets/wdUyf.jpg'); background-position: center, center, center, center, center; background-size: 34px 34px, 34px 34px, auto, auto, cover; }
 .city-map::before, .city-map::after { position: absolute; inset: 9%; border: 1px solid #d7b45f12; content: ''; pointer-events: none; }
 .city-map::after { inset: 16%; border-style: dashed; border-color: #9872c81c; }
 .city-map-roads { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -414,6 +413,7 @@ kbd { font: 9px var(--mono); border: 1px solid #30303a; padding: 2px 4px; color:
 .outer-veil h3 { margin: 10px 0 0; color: #f3efe8; font-size: clamp(18px, 2.4vw, 26px); font-weight: 500; line-height: 1.2; }
 .outer-veil p { margin: 0; color: #aaa2a2; font-size: 10px; line-height: 1.8; }
 .outer-veil strong { display: block; margin-top: 15px; color: #e7c96f; font: 8px var(--mono); letter-spacing: .35px; }
+@keyframes city-detail-in { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
 .public-brief, .public-desk, .public-network { display: grid; grid-template-columns: .9fr 1.1fr; gap: 30px; align-items: center; border-top: 1px solid #302a2b; }
 .public-brief > div:last-child { display: grid; justify-items: start; gap: 15px; }
 .public-brief p { max-width: 540px; margin: 0; color: #aaa2a2; font-size: 11px; line-height: 1.8; }
@@ -428,7 +428,7 @@ kbd { font: 9px var(--mono); border: 1px solid #30303a; padding: 2px 4px; color:
 .public-footer nav button { padding: 0; border: 0; background: none; cursor: pointer; }
 .public-footer-doctrine { grid-column: 1 / -1; color: #e7c96f; font: 8px var(--mono); letter-spacing: .45px; }
 .public-footer > span { grid-column: 1 / -1; padding-top: 13px; border-top: 1px solid #302a2b; color: #786f70; font: 8px var(--mono); letter-spacing: 1px; }
-.public-footer-brand { display: flex; align-items: center; gap: 9px; }.public-footer-brand img { width: 29px; height: 29px; object-fit: cover; object-position: center; border: 1px solid #d7b45f66; }
+.public-footer-brand { display: flex; align-items: center; gap: 9px; }.public-footer-brand img { width: 38px; height: 38px; }
 
 @media (max-width: 760px) {
   .public-nav { display: grid; grid-template-columns: 1fr auto; gap: 9px 8px; min-height: 0; padding: 11px 15px 0; }
@@ -456,14 +456,14 @@ kbd { font: 9px var(--mono); border: 1px solid #30303a; padding: 2px 4px; color:
   .door-card h3 { margin-top: 17px; font-size: 14px; }
   .door-card p { min-height: 82px; font-size: 9px; }
   .door-link { font-size: 7px; }
-  .city-district-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .city-map { min-height: 295px; aspect-ratio: 1.35 / 1; }
   .city-map-node { gap: 4px; max-width: 112px; padding: 4px 5px; font-size: 6px; }
   .city-map-node > i { flex-basis: 5px; width: 5px; height: 5px; }
   .city-map-topline, .city-map-bottomline { align-items: flex-start; font-size: 6px; }
-  .city-district { min-height: 185px; padding: 13px 11px; }
-  .city-district h3 { font-size: 12px; }
-  .city-district p { min-height: 60px; font-size: 8px; }
+  .city-map-detail { grid-template-columns: 1fr; gap: 10px; padding: 16px 40px 16px 14px; }
+  .city-map-detail-heading h3 { font-size: 12px; }
+  .city-map-detail > p { font-size: 8px; }
+  .city-map-detail .door-link { justify-self: start; }
   .city-status { padding: 4px 5px; font-size: 6px; }
   .city-legend { gap: 9px 13px; font-size: 7px; }
   .outer-veil { grid-template-columns: 1fr; gap: 13px; margin-top: 27px; }
