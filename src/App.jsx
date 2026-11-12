@@ -104,12 +104,17 @@ const navItems = [
 
 const ARCADE_URL = 'https://kurogami-arcade.vercel.app';
 const WORLD_URL = 'https://kurogami-v1.vercel.app/#top';
+const FORGE_URL = 'https://kurogami-forge-index.vercel.app/';
+const JOBS_URL = 'https://kurogami-job-board.vercel.app/';
+const KUROGAMI_ACCESS_URL = 'https://kurogami-core.vercel.app/access#desk-process';
 const YUGAMI_HERO_IMAGE = '/assets/yugami-hero.jpg';
 const YUGAMI_LOGO_IMAGE = '/assets/yugami-logo-square.svg';
 
 const publicNavLinks = [
   { label: 'Arcade', href: ARCADE_URL, external: true },
-  { label: 'Desk', href: '#desk' },
+  { label: 'Forge', href: FORGE_URL, external: true },
+  { label: 'Jobs', href: JOBS_URL, external: true },
+  { label: 'Desk', href: KUROGAMI_ACCESS_URL, external: true },
   { label: 'Shop', href: '#shop' },
 ];
 
@@ -677,10 +682,9 @@ function YugamiLanding({ onEnter, onApply }) {
 
     <main>
       <section className="public-hero" id="top">
-        <img src={YUGAMI_HERO_IMAGE} alt="" fetchPriority="high" />
         <div className="public-hero-content">
-          <span className="public-eyebrow">THE FIRST KUROGAMI CITY</span>
-          <h1>YUGAMI</h1>
+          <span className="public-eyebrow">THE YUGAMI SURFACE <i>/</i> CULTURE DOOR</span>
+          <h1>One city.<br /><em>Many doors.</em></h1>
           <p className="public-positioning">The first Kurogami city.</p>
           <p className="public-hero-detail">Art, sound, stories, and independent work — with doors into the Arcade and a measured operator track.</p>
           <div className="public-actions">
@@ -691,22 +695,27 @@ function YugamiLanding({ onEnter, onApply }) {
           </div>
           <span className="public-hero-index">ONE CITY / MANY DISTRICTS / MANY DOORS</span>
         </div>
+        <aside className="public-hero-art" aria-label="Yugami city artwork">
+          <img src={YUGAMI_HERO_IMAGE} alt="" fetchPriority="high" />
+          <div className="public-hero-art-topline"><span>THE FIRST KUROGAMI CITY</span><span>KG / 001</span></div>
+          <div className="public-hero-art-caption"><span>YUGAMI / DISTRICT GRID</span><span>ONE CITY / MANY DISTRICTS</span></div>
+        </aside>
       </section>
 
       <section className="public-section public-intro" id="about">
-        <div className="public-section-heading"><span className="public-eyebrow">01 / THE CITY</span><h2>One map.<br /><em>Many districts.</em></h2></div>
+        <div className="public-section-heading"><span className="public-section-index">01 <i>/</i> THE CITY</span><h2>One map.<br /><em>Many districts.</em></h2></div>
         <p>Yugami is a home for art, sound, stories, and independent work. Explore the shop, meet resident artists, listen in, or step into the Arcade. The Desk is a separate operator track.</p>
       </section>
 
       <section className="public-section" id="doors">
-        <div className="public-section-title"><span className="public-eyebrow">02 / DISTRICT DIRECTORY</span><h2>Choose a door.</h2></div>
+        <div className="public-section-title"><span className="public-section-index">02 <i>/</i> DISTRICT DIRECTORY</span><h2>Choose a door.</h2></div>
         <div className="door-grid">{publicDoors.map(({ title, status, description, href, action, icon: Icon, external }, index) => <article className={`door-card door-card-${status}`} key={title}>
           <div className="door-card-top"><Icon size={20} /><span className={`city-status city-status-${status}`}>{status}</span><span className="door-number">0{index + 1}</span></div><h3>{title}</h3><p>{description}</p><a className="door-link" href={href} target={external ? '_blank' : undefined} rel={external ? 'noreferrer' : undefined}>{action} <ArrowUpRight size={13} /></a>
         </article>)}</div>
       </section>
 
       <section className="public-section public-shop" id="shop">
-        <div className="public-section-title public-shop-heading"><div><span className="public-eyebrow">03 / ATELIER ROW</span><h2>Art + shop.</h2></div><span className="public-section-note">ORIGINALS / MERCH / LIMITED DROPS</span></div>
+        <div className="public-section-title public-shop-heading"><div><span className="public-section-index">03 <i>/</i> ATELIER ROW</span><h2>Art + shop.</h2></div><span className="public-section-note">ORIGINALS / MERCH / LIMITED DROPS</span></div>
         <p className="public-section-copy">Original work, resident artists, merch, and limited drops from across the city.</p>
         <div className="public-product-grid">{products.map((product) => <article className="public-product-card" key={product.name}>
           <div className="public-product-image"><img src={`https://images.unsplash.com/${product.image}?auto=format&fit=crop&w=750&q=75`} alt="" loading="lazy" /><span>{product.category}</span></div>
@@ -723,7 +732,7 @@ function YugamiLanding({ onEnter, onApply }) {
       </section>
 
       <section className="public-section public-feature" id="sound">
-        <div className="public-section-title"><span className="public-eyebrow">04 / RESONANCE</span><h2>Tom sets the tone.</h2></div>
+        <div className="public-section-title"><span className="public-section-index">04 <i>/</i> RESONANCE</span><h2>Tom sets the tone.</h2></div>
         <p className="public-section-copy">AI music videos are the launch engine. New sound and image, built in public.</p>
         <div className="public-video-frame">
           <video className="public-feature-video" aria-label="Tom's featured video" controls playsInline preload="metadata" poster="https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1400&q=80">
@@ -741,7 +750,7 @@ function YugamiLanding({ onEnter, onApply }) {
 
       <section className="public-section public-games" id="arcade">
         <div className="public-games-image"><img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200&q=80" alt="" loading="lazy" /><span className="public-eyebrow">KUROGAMI ARCADE / CABINETS 01—10</span></div>
-        <div><span className="public-eyebrow">05 / THE GAME FLOOR</span><h2>Arcade.</h2><h3>Kurogami Arcade</h3><p>Ten cabinets. Nine train attention. The tenth is Fracture — path toward the desk.</p><a className="public-button public-button-gold" href={ARCADE_URL} target="_blank" rel="noreferrer">Enter Arcade <ArrowUpRight size={14} /></a></div>
+        <div><span className="public-section-index">05 <i>/</i> THE GAME FLOOR</span><h2>Arcade.</h2><h3>Kurogami Arcade</h3><p>Ten cabinets. Nine train attention. The tenth is Fracture — path toward the desk.</p><a className="public-button public-button-gold" href={ARCADE_URL} target="_blank" rel="noreferrer">Enter Arcade <ArrowUpRight size={14} /></a></div>
       </section>
 
       <section className="public-section public-world" id="world">
@@ -750,7 +759,7 @@ function YugamiLanding({ onEnter, onApply }) {
       </section>
 
       <section className="public-section public-city" id="city-map">
-        <div className="public-section-title"><span className="public-eyebrow">06 / THE LIVING ROADMAP</span><h2>Yugami City — The First Kurogami City</h2></div>
+        <div className="public-section-title"><span className="public-section-index">06 <i>/</i> THE LIVING ROADMAP</span><h2>Yugami City — The First Kurogami City</h2></div>
         <p className="public-section-copy">One map. Many doors. Each district is a real piece of the ecosystem — some open now, some next.</p>
         <p className="public-city-miami">Miami is entering a Vice-scale moment — Yugami City is the culture layer we own, with a path into the live virtual street later.</p>
         <div className="city-map-panel" aria-label="Schematic map of Yugami City districts">
@@ -810,17 +819,17 @@ function YugamiLanding({ onEnter, onApply }) {
       </section>
 
       <section className="public-section public-brief" id="brief">
-        <div><span className="public-eyebrow">07 / BRIEF TOWER</span><h2>The city’s signal.</h2></div>
+        <div><span className="public-section-index">07 <i>/</i> BRIEF TOWER</span><h2>The city’s signal.</h2></div>
         <div><p>Dispatches on what the desk and the districts are paying attention to. Hubs start human-run; tools can grow with the city.</p><span className="public-coming">BRIEF OS LINK NOT LIVE YET</span></div>
       </section>
 
       <section className="public-section public-desk" id="desk">
-        <div><span className="public-eyebrow">08 / THE OPERATOR QUARTER</span><h2>The Desk.</h2></div>
-        <div><p>A measured operator track centered on process, structure, and responsibility.</p><button className="public-button public-button-gold" onClick={onApply}>Apply to the operator track <ArrowUpRight size={14} /></button></div>
+        <div><span className="public-section-index">08 <i>/</i> THE OPERATOR QUARTER</span><h2>The Desk.</h2></div>
+        <div><p>A measured operator track centered on process, structure, and responsibility.</p><div className="public-desk-actions"><a className="public-button public-button-gold" href={KUROGAMI_ACCESS_URL} target="_blank" rel="noreferrer">Open Kurogami access <ArrowUpRight size={14} /></a><button className="public-button public-button-outline" onClick={onApply}>Apply to the operator track <ArrowUpRight size={14} /></button></div></div>
       </section>
 
       <section className="public-section public-network" id="network">
-        <div><span className="public-eyebrow">09 / GUILD COURTS</span><h2>Built together.<br /><em>In real life.</em></h2></div>
+        <div><span className="public-section-index">09 <i>/</i> GUILD COURTS</span><h2>Built together.<br /><em>In real life.</em></h2></div>
         <div id="contact"><p>Nights, painting, music, and builders in Miami and beyond. The people are part of the platform. We grade process and capacity under pressure — not hype.</p><button className="public-button public-button-outline" onClick={onApply}>Enter / Apply <ArrowUpRight size={14} /></button><span className="public-section-note">EVENTS / MIAMI + BEYOND</span></div>
       </section>
     </main>
@@ -828,8 +837,8 @@ function YugamiLanding({ onEnter, onApply }) {
     <footer className="public-footer">
       <p>A home for art, sound, stories, and independent work — with Arcade and Desk as distinct doors.</p>
       <strong className="public-footer-doctrine">The key is admission. The districts are the product.</strong>
-      <nav aria-label="Footer navigation"><a href={ARCADE_URL} target="_blank" rel="noreferrer">Arcade</a><a href="#desk">Desk</a><a href="#shop">Shop</a><button onClick={onEnter}>Enter</button></nav>
-      <span className="public-footer-brand"><img src={YUGAMI_LOGO_IMAGE} alt="" /> YUGAMI / KUROGAMI</span>
+      <nav aria-label="Footer navigation"><a href={ARCADE_URL} target="_blank" rel="noreferrer">Arcade</a><a href={FORGE_URL} target="_blank" rel="noreferrer">Forge</a><a href={JOBS_URL} target="_blank" rel="noreferrer">Jobs</a><a href={KUROGAMI_ACCESS_URL} target="_blank" rel="noreferrer">Desk / Access</a><a href="#shop">Shop</a><button onClick={onEnter}>Enter</button></nav>
+      <span className="public-footer-brand">KUROGAMI GROUP © 2026</span>
     </footer>
   </>;
 }
